@@ -42,8 +42,8 @@ namespace Stratis.Bitcoin.Features.Consensus
         /// <remarks>Used to decrease granularity of timestamp. Supposed to be 2^n-1.</remarks>
         public const uint StakeTimestampMask = 0x0000000F;
 
-        /// <summary>Drifting Bug Fix, hardfork on Sat, 19 Nov 2016 00:00:00 GMT.</summary>
-        public const long DriftingBugFixTimestamp = 1479513600;
+        /// <summary>Drifting Bug Fix, hardfork on  16 May 2018 00:00:00 GMT.</summary>
+        public const long DriftingBugFixTimestamp = 1526428800;
 
         /// <summary>Instance logger.</summary>
         private readonly ILogger logger;

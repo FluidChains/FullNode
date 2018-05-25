@@ -1,31 +1,17 @@
-| Windows | Linux | OS X
-| :---- | :------ | :---- |
-[![Windows build status][1]][2] | [![Linux build status][3]][4] | [![OS X build status][5]][6] | 
-
-[1]: https://ci.appveyor.com/api/projects/status/451tv98n7xvxm5ol/branch/master?svg=true
-[2]: https://ci.appveyor.com/project/stratis/stratisbitcoinfullnode
-[3]: https://travis-ci.org/stratisproject/StratisBitcoinFullNode.svg?branch=master
-[4]: https://travis-ci.org/stratisproject/StratisBitcoinFullNode
-[5]: https://travis-ci.org/stratisproject/StratisBitcoinFullNode.svg?branch=master
-[6]: https://travis-ci.org/stratisproject/StratisBitcoinFullNode
-
-
-Stratis Bitcoin
+CivXFullNode
 ===============
 
-https://stratisplatform.com
+https://civxeconomy.com/
 
 Bitcoin Implementation in C#
 ----------------------------
 
-Stratis is an implementation of the Bitcoin protocol in C# on the [.NET Core](https://dotnet.github.io/) platform.  
-The node can run on the Bitcoin and Stratis networks.  
-Stratis Bitcoin is based on the [NBitcoin](https://github.com/MetacoSA/NBitcoin) project.  
-
-For Proof of Stake support on the Stratis token the node is using [NStratis](https://github.com/stratisproject/NStratis) which is a POS implementation of NBitcoin.  
+CivX is an implementation of the Bitcoin protocol in C# on the [.NET Core](https://dotnet.github.io/) platform.  
+The node can run on the Bitcoin and CivX networks.  
+CivX token is based on the [NBitcoin](https://github.com/MetacoSA/NBitcoin) project and [Stratis](https://github.com/stratisproject/StratisBitcoinFullNode) project.
 
 [.NET Core](https://dotnet.github.io/) is an open source cross platform framework and enables the development of applications and services on Windows, macOS and Linux.  
-Join our community on [slack](https://stratisplatform.slack.com).  
+Join our community on [Discord](https://discord.gg/eCNMCMt).  
 
 The design
 ----------
@@ -70,7 +56,7 @@ Running a FullNode
 Our full node is currently in alpha.  
 
 ```
-git clone https://github.com/stratisproject/StratisBitcoinFullNode.git  
+git clone https://github.com/exofoundation/CivXFullNode.git
 cd StratisBitcoinFullNode\src
 
 dotnet restore
@@ -79,11 +65,11 @@ dotnet build
 ```
 
 To run on the Bitcoin network: ``` Stratis.BitcoinD\dotnet run ```  
-To run on the Stratis network: ``` Stratis.StratisD\dotnet run ```  
+To run on the CivX network: ``` Stratis.StratisD\dotnet run ```  
 
 Getting Started Guide
 -----------
-More details on getting started are available [here](https://github.com/stratisproject/StratisBitcoinFullNode/blob/master/Documentation/getting-started.md)
+More details on getting started are available [here](https://github.com/exofoundation/CivXFullNode/blob/master/Documentation/getting-started.md)
 
 Development
 -----------
@@ -92,10 +78,8 @@ Up for some blockchain development?
 Check this guides for more info:
 * [Contributing Guide](Documentation/contributing.md)
 * [Coding Style](Documentation/coding-style.md)
-* [Wiki Page](https://stratisplatform.atlassian.net/wiki/spaces/WIKI/overview)
 
 There is a lot to do and we welcome contributers developers and testers who want to get some Blockchain experience.
-You can find tasks at the issues/projects or visit our [C# dev](https://stratisplatform.slack.com/messages/csharp_development/) slack channel.
 
 Testing
 -------
