@@ -53,9 +53,6 @@ namespace Stratis.Bitcoin.P2P
         /// <summary>Peer address manager instance, see <see cref="IPeerAddressManager"/>.</summary>
         private readonly IPeerAddressManager peerAddressManager;
 
-        /// <summary>The amount of peers to find.</summary>
-        private int peersToFind;
-
         /// <summary>The network the node is running on.</summary>
         private readonly Network network;
 
@@ -64,6 +61,8 @@ namespace Stratis.Bitcoin.P2P
 
         /// <summary>Indicates the dns and seed nodes were attempted.</summary>
         private bool isSeedAndDnsAttempted;
+
+        private const int TargetAmountOfPeersToDiscover = 2000;
 
         public PeerDiscovery(
             IAsyncLoopFactory asyncLoopFactory,
@@ -87,40 +86,31 @@ namespace Stratis.Bitcoin.P2P
         /// <inheritdoc/>
         public void DiscoverPeers(IConnectionManager connectionManager)
         {
-            this.logger.LogTrace("()");
-
-            // If peers are specified in the -connect arg then discovery does not happen.            
+            // If peers are specified in the -connect arg then discovery does not happen.
             if (connectionManager.ConnectionSettings.Connect.Any())
                 return;
 
             if (!connectionManager.Parameters.PeerAddressManagerBehaviour().Mode.HasFlag(PeerAddressManagerBehaviourMode.Discover))
                 return;
 
-            this.currentParameters = connectionManager.Parameters.Clone();
-            this.currentParameters.TemplateBehaviors.Add(new ConnectionManagerBehavior(false, connectionManager, this.loggerFactory));
-
-            this.peersToFind = this.currentParameters.PeerAddressManagerBehaviour().PeersToDiscover;
+            this.currentParameters = connectionManager.Parameters.Clone(); // TODO we shouldn't add all the behaviors, only those that we need.
 
             this.asyncLoop = this.asyncLoopFactory.Run(nameof(this.DiscoverPeersAsync), async token =>
             {
-                if (this.peerAddressManager.Peers.Count < this.peersToFind)
+                if (this.peerAddressManager.Peers.Count < TargetAmountOfPeersToDiscover)
                     await this.DiscoverPeersAsync();
             },
             this.nodeLifetime.ApplicationStopping,
             TimeSpans.TenSeconds);
-
-            this.logger.LogTrace("(-)");
         }
 
         /// <summary>
-        /// See <see cref="DiscoverPeers"/>
+        /// See <see cref="DiscoverPeers"/>.
         /// </summary>
         private async Task DiscoverPeersAsync()
         {
-            this.logger.LogTrace("()");
-
             var peersToDiscover = new List<IPEndPoint>();
-            var foundPeers = this.peerAddressManager.PeerSelector.SelectPeersForDiscovery(1000).ToList();
+            List<PeerAddress> foundPeers = this.peerAddressManager.PeerSelector.SelectPeersForDiscovery(1000).ToList();
             peersToDiscover.AddRange(foundPeers.Select(p => p.Endpoint));
 
             if (peersToDiscover.Count == 0)
@@ -155,7 +145,7 @@ namespace Stratis.Bitcoin.P2P
                     this.isSeedAndDnsAttempted = true;
                 }
             }
-            
+
             await peersToDiscover.ForEachAsync(5, this.nodeLifetime.ApplicationStopping, async (endPoint, cancellation) =>
             {
                 using (CancellationTokenSource connectTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellation))
@@ -171,7 +161,7 @@ namespace Stratis.Bitcoin.P2P
                         NetworkPeerConnectionParameters clonedParameters = this.currentParameters.Clone();
                         clonedParameters.ConnectCancellation = connectTokenSource.Token;
 
-                        var addressManagerBehaviour = clonedParameters.TemplateBehaviors.Find<PeerAddressManagerBehaviour>();
+                        PeerAddressManagerBehaviour addressManagerBehaviour = clonedParameters.TemplateBehaviors.OfType<PeerAddressManagerBehaviour>().FirstOrDefault();
                         clonedParameters.TemplateBehaviors.Clear();
                         clonedParameters.TemplateBehaviors.Add(addressManagerBehaviour);
 
@@ -195,8 +185,6 @@ namespace Stratis.Bitcoin.P2P
                     this.logger.LogTrace("Discovery from '{0}' finished", endPoint);
                 }
             }).ConfigureAwait(false);
-
-            this.logger.LogTrace("(-)");
         }
 
         /// <summary>
@@ -204,11 +192,11 @@ namespace Stratis.Bitcoin.P2P
         /// </summary>
         private void AddDNSSeedNodes(List<IPEndPoint> endPoints)
         {
-            foreach (var seed in this.network.DNSSeeds)
+            foreach (DNSSeedData seed in this.network.DNSSeeds)
             {
                 try
                 {
-                    var ipAddresses = seed.GetAddressNodes();
+                    IPAddress[] ipAddresses = seed.GetAddressNodes();
                     endPoints.AddRange(ipAddresses.Select(ip => new IPEndPoint(ip, this.network.DefaultPort)));
                 }
                 catch (Exception)

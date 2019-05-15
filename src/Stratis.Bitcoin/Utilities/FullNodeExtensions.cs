@@ -18,13 +18,13 @@ namespace Stratis.Bitcoin.Utilities
         public static async Task RunAsync(this IFullNode node)
         {
             var done = new ManualResetEventSlim(false);
-            using (CancellationTokenSource cts = new CancellationTokenSource())
+            using (var cts = new CancellationTokenSource())
             {
                 Action shutdown = () =>
                 {
                     if (!cts.IsCancellationRequested)
                     {
-                        Console.WriteLine("Application is shutting down...");
+                        Console.WriteLine("Application is shutting down.");
                         try
                         {
                             cts.Cancel();
@@ -34,11 +34,11 @@ namespace Stratis.Bitcoin.Utilities
                             Console.WriteLine(exception.Message);
                         }
                     }
-                    
+
                     done.Wait();
                 };
 
-                var assemblyLoadContext = AssemblyLoadContext.GetLoadContext(typeof(FullNode).GetTypeInfo().Assembly);
+                AssemblyLoadContext assemblyLoadContext = AssemblyLoadContext.GetLoadContext(typeof(FullNode).GetTypeInfo().Assembly);
                 assemblyLoadContext.Unloading += context => shutdown();
 
                 Console.CancelKeyPress += (sender, eventArgs) =>
@@ -69,7 +69,7 @@ namespace Stratis.Bitcoin.Utilities
         public static async Task RunAsync(this IFullNode node, CancellationToken cancellationToken, string shutdownMessage, string shutdownCompleteMessage)
         {
             node.Start();
-            
+
             if (!string.IsNullOrEmpty(shutdownMessage))
             {
                 Console.WriteLine();

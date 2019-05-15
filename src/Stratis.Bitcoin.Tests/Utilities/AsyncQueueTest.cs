@@ -78,7 +78,7 @@ namespace Stratis.Bitcoin.Tests.Utilities
 
             int itemsToProcess = 20;
             int itemsProcessed = 0;
-            ManualResetEventSlim allItemsProcessed = new ManualResetEventSlim();
+            var allItemsProcessed = new ManualResetEventSlim();
 
             var asyncQueue = new AsyncQueue<int>(async (item, cancellation) =>
             {
@@ -121,7 +121,7 @@ namespace Stratis.Bitcoin.Tests.Utilities
         {
             int itemsToProcess = 30;
             int itemPrevious = -1;
-            ManualResetEventSlim signal = new ManualResetEventSlim();
+            var signal = new ManualResetEventSlim();
 
             var asyncQueue = new AsyncQueue<int>(async (item, cancellation) =>
             {
@@ -234,7 +234,7 @@ namespace Stratis.Bitcoin.Tests.Utilities
             var asyncQueue = new AsyncQueue<int>();
 
             // List of items collected by the consumer task.
-            List<int> list = new List<int>();
+            var list = new List<int>();
 
             Task consumer = Task.Run(async () =>
             {
@@ -323,8 +323,8 @@ namespace Stratis.Bitcoin.Tests.Utilities
             var asyncQueue = new AsyncQueue<int>();
 
             // List of items collected by the consumer tasks.
-            List<int> list1 = new List<int>();
-            List<int> list2 = new List<int>();
+            var list1 = new List<int>();
+            var list2 = new List<int>();
 
             using (var cts = new CancellationTokenSource())
             {
@@ -402,7 +402,7 @@ namespace Stratis.Bitcoin.Tests.Utilities
         /// exception when it is called on a queue operating in callback mode.
         /// </summary>
         [Fact]
-        public void AsyncQueue_DequeueThrowsInCallbackMode()
+        public async Task AsyncQueue_DequeueThrowsInCallbackMode()
         {
             var asyncQueue = new AsyncQueue<int>((item, cancellation) =>
             {
@@ -410,7 +410,7 @@ namespace Stratis.Bitcoin.Tests.Utilities
             });
 
             // Enqueue an item, which should trigger the callback.
-            Assert.ThrowsAsync< InvalidOperationException>(async () => await asyncQueue.DequeueAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await asyncQueue.DequeueAsync());
         }
 
         /// <summary>

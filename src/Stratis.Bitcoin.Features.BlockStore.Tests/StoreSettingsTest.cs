@@ -1,45 +1,46 @@
-﻿using NBitcoin;
-using Stratis.Bitcoin.Builder;
+﻿using Stratis.Bitcoin.Builder;
 using Stratis.Bitcoin.Configuration;
+using Stratis.Bitcoin.Features.Consensus;
 using Stratis.Bitcoin.Tests.Common;
 using Xunit;
 
 namespace Stratis.Bitcoin.Features.BlockStore.Tests
 {
-    public class StoreSettingsTest : TestBase
-    {
-        public StoreSettingsTest() : base(Network.Main)
-        {
-        }
-
-        [Fact]
+    public class StoreSettingsTest : TestBase	
+    {	
+        public StoreSettingsTest() : base(KnownNetworks.Main)
+        {	
+        }	
+	
+        [Fact]	
         public void CanSpecifyStoreSettings()
         {
             string dir = CreateTestDir(this);
 
-            NodeSettings nodeSettings = new NodeSettings(args:new string[] { $"-datadir={dir}" }, loadConfiguration:false);
+            var nodeSettings = new NodeSettings(this.Network, args: new string[] { $"-datadir={dir}" });
 
-            var node1 = new FullNodeBuilder()
-                .UseNodeSettings(nodeSettings)
-                .UseBlockStore()
-                .Build();
+            IFullNode node1 = FullNodeSetup(nodeSettings);
 
             var settings1 = node1.NodeService<StoreSettings>();
 
-            settings1.Load(nodeSettings);
-
             Assert.False(settings1.ReIndex);
 
-            var node2 = new FullNodeBuilder()
-                .UseNodeSettings(nodeSettings)
-                .UseBlockStore(x => x.ReIndex = true)
-                .Build();
+            nodeSettings = new NodeSettings(this.Network, args: new string[] { $"-datadir={dir}", "-reindex=1" });
+
+            IFullNode node2 = FullNodeSetup(nodeSettings);
 
             var settings2 = node2.NodeService<StoreSettings>();
 
-            settings2.Load(nodeSettings);
-
             Assert.True(settings2.ReIndex);
         }
-    }
+
+        private static IFullNode FullNodeSetup(NodeSettings nodeSettings)
+        {
+            return new FullNodeBuilder()
+                            .UseNodeSettings(nodeSettings)
+                            .UseBlockStore()
+                            .UsePowConsensus()
+                            .Build();
+        }
+    }	
 }

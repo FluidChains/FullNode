@@ -9,6 +9,7 @@ using Stratis.Bitcoin.P2P.Protocol;
 using Stratis.Bitcoin.P2P.Protocol.Behaviors;
 using Stratis.Bitcoin.P2P.Protocol.Payloads;
 using Stratis.Bitcoin.Utilities;
+using TracerAttributes;
 
 namespace Stratis.Bitcoin.Connection
 {
@@ -47,8 +48,6 @@ namespace Stratis.Bitcoin.Connection
 
         private Task OnMessageReceivedAsync(INetworkPeer peer, IncomingMessage message)
         {
-            this.logger.LogTrace("({0}:'{1}',{2}:'{3}')", nameof(peer), peer.RemoteSocketEndpoint, nameof(message), message.Message.Command);
-
             if (message.Message.Payload is VersionPayload version)
             {
                 IPeerConnector peerConnector = null;
@@ -61,32 +60,28 @@ namespace Stratis.Bitcoin.Connection
                 decimal thresholdCount = Math.Round(peerConnector.MaxOutboundConnections * this.dropThreshold, MidpointRounding.ToEven);
 
                 if (thresholdCount < this.connection.ConnectedPeers.Count())
+                {
                     if (version.StartHeight < this.chain.Height)
                         peer.Disconnect($"Node at height = {version.StartHeight} too far behind current height");
+                }
             }
 
-            this.logger.LogTrace("(-)");
             return Task.CompletedTask;
         }
 
+        [NoTrace]
         protected override void AttachCore()
         {
-            this.logger.LogTrace("()");
-
             this.AttachedPeer.MessageReceived.Register(this.OnMessageReceivedAsync);
-
-            this.logger.LogTrace("(-)");
         }
 
+        [NoTrace]
         protected override void DetachCore()
         {
-            this.logger.LogTrace("()");
-
             this.AttachedPeer.MessageReceived.Unregister(this.OnMessageReceivedAsync);
-
-            this.logger.LogTrace("(-)");
         }
 
+        [NoTrace]
         public override object Clone()
         {
             return new DropNodesBehaviour(this.chain, this.connection, this.loggerFactory);

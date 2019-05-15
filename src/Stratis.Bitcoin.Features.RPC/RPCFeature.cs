@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,12 +37,6 @@ namespace Stratis.Bitcoin.Features.RPC
             this.rpcSettings = rpcSettings;
         }
 
-        /// <inheritdoc />
-        public override void LoadConfiguration()
-        {
-            this.rpcSettings.Load(this.nodeSettings);
-        }
-
         /// <summary>
         /// Prints command-line help.
         /// </summary>
@@ -66,7 +62,7 @@ namespace Stratis.Bitcoin.Features.RPC
             builder.AppendLine("#rpcallowip=127.0.0.1");
         }
 
-        public override void Initialize()
+        public override Task InitializeAsync()
         {
             if (this.rpcSettings.Server)
             {
@@ -83,7 +79,7 @@ namespace Stratis.Bitcoin.Features.RPC
                     {
                         // copies all the services defined for the full node to the Api.
                         // also copies over singleton instances already defined
-                        foreach (var service in this.fullNodeBuilder.Services)
+                        foreach (ServiceDescriptor service in this.fullNodeBuilder.Services)
                         {
                             object obj = this.fullNode.Services.ServiceProvider.GetService(service.ServiceType);
 
@@ -102,13 +98,14 @@ namespace Stratis.Bitcoin.Features.RPC
                 .Build();
 
                 this.fullNode.RPCHost.Start();
-                this.fullNode.Resources.Add(this.fullNode.RPCHost);
                 this.logger.LogInformation("RPC Server listening on: " + Environment.NewLine + string.Join(Environment.NewLine, this.rpcSettings.GetUrls()));
             }
             else
             {
-                this.logger.LogWarning("RPC Server is off based on configuration.");
+                this.logger.LogInformation("RPC Server is off based on configuration.");
             }
+            
+            return Task.CompletedTask;
         }
     }
 
@@ -117,7 +114,7 @@ namespace Stratis.Bitcoin.Features.RPC
     /// </summary>
     public static class FullNodeBuilderRPCExtension
     {
-        public static IFullNodeBuilder AddRPC(this IFullNodeBuilder fullNodeBuilder, Action<RpcSettings> setup = null)
+        public static IFullNodeBuilder AddRPC(this IFullNodeBuilder fullNodeBuilder)
         {
             LoggingConfiguration.RegisterFeatureNamespace<RPCFeature>("rpc");
 
@@ -133,7 +130,7 @@ namespace Stratis.Bitcoin.Features.RPC
             {
                 service.AddSingleton<FullNodeController>();
                 service.AddSingleton<ConnectionManagerController>();
-                service.AddSingleton<RpcSettings>(new RpcSettings(setup));
+                service.AddSingleton<RpcSettings>();
                 service.AddSingleton<IRPCClientFactory, RPCClientFactory>();
                 service.AddSingleton<RPCController>();
             });

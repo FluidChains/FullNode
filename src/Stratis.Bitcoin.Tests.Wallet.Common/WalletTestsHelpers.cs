@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NBitcoin;
 using Stratis.Bitcoin.Features.Wallet;
-using PaymentDetails = Stratis.Bitcoin.Features.Wallet.PaymentDetails;
+using Stratis.Bitcoin.Tests.Common;
 
 namespace Stratis.Bitcoin.Tests.Wallet.Common
 {
@@ -64,7 +64,7 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static HdAddress CreateAddress(bool changeAddress = false)
         {
-            var hdPath = "1/2/3/4/5";
+            string hdPath = "1/2/3/4/5";
             if (changeAddress)
             {
                 hdPath = "1/2/3/4/1";
@@ -72,7 +72,7 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
             var key = new Key();
             var address = new HdAddress
             {
-                Address = key.PubKey.GetAddress(Network.Main).ToString(),
+                Address = key.PubKey.GetAddress(KnownNetworks.Main).ToString(),
                 HdPath = hdPath,
                 ScriptPubKey = key.ScriptPubKey
             };
@@ -80,14 +80,14 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
             return address;
         }
 
-        public static ChainedHeader AppendBlock(ChainedHeader previous = null, params ConcurrentChain[] chains)
+        public static ChainedHeader AppendBlock(Network network, ChainedHeader previous = null, params ConcurrentChain[] chains)
         {
             ChainedHeader last = null;
-            var nonce = RandomUtils.GetUInt32();
+            uint nonce = RandomUtils.GetUInt32();
             foreach (ConcurrentChain chain in chains)
             {
-                var block = new Block();
-                block.AddTransaction(new Transaction());
+                Block block = network.CreateBlock();
+                block.AddTransaction(network.CreateTransaction());
                 block.UpdateMerkleRoot();
                 block.Header.HashPrevBlock = previous == null ? chain.Tip.HashBlock : previous.HashBlock;
                 block.Header.Nonce = nonce;
@@ -97,13 +97,13 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
             return last;
         }
 
-        public static (ChainedHeader ChainedHeader, Block Block) AppendBlock(ChainedHeader previous, ConcurrentChain chain)
+        public static (ChainedHeader ChainedHeader, Block Block) AppendBlock(Network network, ChainedHeader previous, ConcurrentChain chain)
         {
             ChainedHeader last = null;
-            var nonce = RandomUtils.GetUInt32();
-            var block = new Block();
+            uint nonce = RandomUtils.GetUInt32();
+            Block block = network.CreateBlock();
 
-            block.AddTransaction(new Transaction());
+            block.AddTransaction(network.CreateTransaction());
             block.UpdateMerkleRoot();
             block.Header.HashPrevBlock = previous == null ? chain.Tip.HashBlock : previous.HashBlock;
             block.Header.Nonce = nonce;
@@ -113,14 +113,16 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
             return (last, block);
         }
 
-        public static TransactionBuildContext CreateContext(WalletAccountReference accountReference, string password,
+        public static TransactionBuildContext CreateContext(Network network, WalletAccountReference accountReference, string password,
             Script destinationScript, Money amount, FeeType feeType, int minConfirmations)
         {
-            return new TransactionBuildContext(accountReference,
-                new[] { new Recipient { Amount = amount, ScriptPubKey = destinationScript } }.ToList(), password)
+            return new TransactionBuildContext(network)
             {
+                AccountReference = accountReference,
                 MinConfirmations = minConfirmations,
-                FeeType = feeType
+                FeeType = feeType,
+                WalletPassword = password,
+                Recipients = new[] { new Recipient { Amount = amount, ScriptPubKey = destinationScript } }.ToList()
             };
         }
 
@@ -141,17 +143,17 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static (Features.Wallet.Wallet wallet, ExtKey key) GenerateBlankWalletWithExtKey(string name, string password)
         {
-            Mnemonic mnemonic = new Mnemonic("grass industry beef stereo soap employ million leader frequent salmon crumble banana");
+            var mnemonic = new Mnemonic("grass industry beef stereo soap employ million leader frequent salmon crumble banana");
             ExtKey extendedKey = mnemonic.DeriveExtKey(password);
 
-            Features.Wallet.Wallet walletFile = new Features.Wallet.Wallet
+            var walletFile = new Features.Wallet.Wallet
             {
                 Name = name,
-                EncryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, Network.Main).ToWif(),
+                EncryptedSeed = extendedKey.PrivateKey.GetEncryptedBitcoinSecret(password, KnownNetworks.Main).ToWif(),
                 ChainCode = extendedKey.ChainCode,
                 CreationTime = DateTimeOffset.Now,
-                Network = Network.Main,
-                AccountsRoot = new List<AccountRoot> { new AccountRoot() { Accounts = new List<HdAccount>(), CoinType = (CoinType)Network.Main.Consensus.CoinType } },
+                Network = KnownNetworks.Main,
+                AccountsRoot = new List<AccountRoot> { new AccountRoot() { Accounts = new List<HdAccount>(), CoinType = (CoinType)KnownNetworks.Main.Consensus.CoinType } },
             };
 
             return (walletFile, extendedKey);
@@ -160,8 +162,8 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         public static Block AppendTransactionInNewBlockToChain(ConcurrentChain chain, Transaction transaction)
         {
             ChainedHeader last = null;
-            var nonce = RandomUtils.GetUInt32();
-            var block = chain.Network.Consensus.ConsensusFactory.CreateBlock();
+            uint nonce = RandomUtils.GetUInt32();
+            Block block = chain.Network.Consensus.ConsensusFactory.CreateBlock();
             block.AddTransaction(transaction);
             block.UpdateMerkleRoot();
             block.Header.HashPrevBlock = chain.Tip.HashBlock;
@@ -174,16 +176,21 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static Transaction SetupValidTransaction(Features.Wallet.Wallet wallet, string password, HdAddress spendingAddress, PubKey destinationPubKey, HdAddress changeAddress, Money amount, Money fee)
         {
-            var spendingTransaction = spendingAddress.Transactions.ElementAt(0);
-            Coin coin = new Coin(spendingTransaction.Id, (uint)spendingTransaction.Index, spendingTransaction.Amount, spendingTransaction.ScriptPubKey);
+            return SetupValidTransaction(wallet, password, spendingAddress, destinationPubKey.ScriptPubKey, changeAddress, amount, fee);
+        }
 
-            var privateKey = Key.Parse(wallet.EncryptedSeed, password, wallet.Network);
+        public static Transaction SetupValidTransaction(Features.Wallet.Wallet wallet, string password, HdAddress spendingAddress, Script destinationScript, HdAddress changeAddress, Money amount, Money fee)
+        {
+            TransactionData spendingTransaction = spendingAddress.Transactions.ElementAt(0);
+            var coin = new Coin(spendingTransaction.Id, (uint)spendingTransaction.Index, spendingTransaction.Amount, spendingTransaction.ScriptPubKey);
+
+            Key privateKey = Key.Parse(wallet.EncryptedSeed, password, wallet.Network);
 
             var builder = new TransactionBuilder(wallet.Network);
             Transaction tx = builder
                 .AddCoins(new List<Coin> { coin })
                 .AddKeys(new ExtKey(privateKey, wallet.ChainCode).Derive(new KeyPath(spendingAddress.HdPath)).GetWif(wallet.Network))
-                .Send(destinationPubKey.ScriptPubKey, amount)
+                .Send(destinationScript, amount)
                 .SetChange(changeAddress.ScriptPubKey)
                 .SendFees(fee)
                 .BuildTransaction(true);
@@ -198,7 +205,7 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static void AddAddressesToWallet(WalletManager walletManager, int count)
         {
-            foreach (var wallet in walletManager.Wallets)
+            foreach (Features.Wallet.Wallet wallet in walletManager.Wallets)
             {
                 wallet.AccountsRoot.Add(new AccountRoot()
                 {
@@ -243,10 +250,10 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static List<HdAddress> GenerateAddresses(int count)
         {
-            List<HdAddress> addresses = new List<HdAddress>();
+            var addresses = new List<HdAddress>();
             for (int i = 0; i < count; i++)
             {
-                HdAddress address = new HdAddress
+                var address = new HdAddress
                 {
                     ScriptPubKey = new Key().ScriptPubKey
                 };
@@ -258,14 +265,14 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         public static (ExtKey ExtKey, string ExtPubKey) GenerateAccountKeys(Features.Wallet.Wallet wallet, string password, string keyPath)
         {
             var accountExtKey = new ExtKey(Key.Parse(wallet.EncryptedSeed, password, wallet.Network), wallet.ChainCode);
-            var accountExtendedPubKey = accountExtKey.Derive(new KeyPath(keyPath)).Neuter().ToString(wallet.Network);
+            string accountExtendedPubKey = accountExtKey.Derive(new KeyPath(keyPath)).Neuter().ToString(wallet.Network);
             return (accountExtKey, accountExtendedPubKey);
         }
 
         public static (PubKey PubKey, BitcoinPubKeyAddress Address) GenerateAddressKeys(Features.Wallet.Wallet wallet, string accountExtendedPubKey, string keyPath)
         {
-            var addressPubKey = ExtPubKey.Parse(accountExtendedPubKey).Derive(new KeyPath(keyPath)).PubKey;
-            var address = addressPubKey.GetAddress(wallet.Network);
+            PubKey addressPubKey = ExtPubKey.Parse(accountExtendedPubKey).Derive(new KeyPath(keyPath)).PubKey;
+            BitcoinPubKeyAddress address = addressPubKey.GetAddress(wallet.Network);
 
             return (addressPubKey, address);
         }
@@ -273,12 +280,12 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         public static ConcurrentChain GenerateChainWithHeight(int blockAmount, Network network)
         {
             var chain = new ConcurrentChain(network);
-            var nonce = RandomUtils.GetUInt32();
-            var prevBlockHash = chain.Genesis.HashBlock;
-            for (var i = 0; i < blockAmount; i++)
+            uint nonce = RandomUtils.GetUInt32();
+            uint256 prevBlockHash = chain.Genesis.HashBlock;
+            for (int i = 0; i < blockAmount; i++)
             {
-                var block = new Block();
-                block.AddTransaction(new Transaction());
+                Block block = network.Consensus.ConsensusFactory.CreateBlock();
+                block.AddTransaction(network.CreateTransaction());
                 block.UpdateMerkleRoot();
                 block.Header.BlockTime = new DateTimeOffset(new DateTime(2017, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(i));
                 block.Header.HashPrevBlock = prevBlockHash;
@@ -302,16 +309,16 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         {
             var rightchain = new ConcurrentChain(network);
             var leftchain = new ConcurrentChain(network);
-            var prevBlockHash = rightchain.Genesis.HashBlock;
+            uint256 prevBlockHash = rightchain.Genesis.HashBlock;
             var leftForkBlocks = new List<Block>();
             var rightForkBlocks = new List<Block>();
 
             // build up left fork fully and right fork until forkblock
             uint256 forkBlockPrevHash = null;
-            for (var i = 0; i < blockAmount; i++)
+            for (int i = 0; i < blockAmount; i++)
             {
-                var block = new Block();
-                block.AddTransaction(new Transaction());
+                Block block = network.Consensus.ConsensusFactory.CreateBlock();
+                block.AddTransaction(network.CreateTransaction());
                 block.UpdateMerkleRoot();
                 block.Header.HashPrevBlock = prevBlockHash;
                 block.Header.Nonce = RandomUtils.GetUInt32();
@@ -332,10 +339,10 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
             }
 
             // build up the right fork further.
-            for (var i = forkBlock; i < blockAmount; i++)
+            for (int i = forkBlock; i < blockAmount; i++)
             {
-                var block = new Block();
-                block.AddTransaction(new Transaction());
+                Block block = network.Consensus.ConsensusFactory.CreateBlock();
+                block.AddTransaction(network.CreateTransaction());
                 block.UpdateMerkleRoot();
                 block.Header.HashPrevBlock = forkBlockPrevHash;
                 block.Header.Nonce = RandomUtils.GetUInt32();
@@ -356,13 +363,13 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         public static (ConcurrentChain Chain, List<Block> Blocks) GenerateChainAndBlocksWithHeight(int blockAmount, Network network)
         {
             var chain = new ConcurrentChain(network);
-            var nonce = RandomUtils.GetUInt32();
-            var prevBlockHash = chain.Genesis.HashBlock;
+            uint nonce = RandomUtils.GetUInt32();
+            uint256 prevBlockHash = chain.Genesis.HashBlock;
             var blocks = new List<Block>();
-            for (var i = 0; i < blockAmount; i++)
+            for (int i = 0; i < blockAmount; i++)
             {
-                var block = new Block();
-                block.AddTransaction(new Transaction());
+                Block block = network.Consensus.ConsensusFactory.CreateBlock();
+                block.AddTransaction(network.CreateTransaction());
                 block.UpdateMerkleRoot();
                 block.Header.HashPrevBlock = prevBlockHash;
                 block.Header.Nonce = nonce;
@@ -376,10 +383,10 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static ConcurrentChain PrepareChainWithBlock()
         {
-            var chain = new ConcurrentChain(Network.StratisMain);
-            var nonce = RandomUtils.GetUInt32();
-            var block = new Block();
-            block.AddTransaction(new Transaction());
+            var chain = new ConcurrentChain(KnownNetworks.StratisMain);
+            uint nonce = RandomUtils.GetUInt32();
+            Block block = KnownNetworks.StratisMain.CreateBlock();
+            block.AddTransaction(KnownNetworks.StratisMain.CreateTransaction());
             block.UpdateMerkleRoot();
             block.Header.HashPrevBlock = chain.Genesis.HashBlock;
             block.Header.Nonce = nonce;
@@ -444,7 +451,7 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static TransactionData CreateTransactionDataFromFirstBlock((ConcurrentChain chain, uint256 blockHash, Block block) chainInfo)
         {
-            var transaction = chainInfo.block.Transactions[0];
+            Transaction transaction = chainInfo.block.Transactions[0];
 
             var addressTransaction = new TransactionData
             {
@@ -456,6 +463,7 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
                 Index = 0,
                 ScriptPubKey = transaction.Outputs[0].ScriptPubKey,
             };
+
             return addressTransaction;
         }
 
@@ -463,12 +471,12 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
         {
             var chain = new ConcurrentChain(network);
 
-            Block block = new Block();
+            Block block = network.Consensus.ConsensusFactory.CreateBlock();
             block.Header.HashPrevBlock = chain.Tip.HashBlock;
             block.Header.Bits = block.Header.GetWorkRequired(network, chain.Tip);
             block.Header.UpdateTime(DateTimeOffset.UtcNow, network, chain.Tip);
 
-            var coinbase = new Transaction();
+            Transaction coinbase = network.CreateTransaction();
             coinbase.AddInput(TxIn.CreateCoinbase(chain.Height + 1));
             coinbase.AddOutput(new TxOut(network.GetReward(chain.Height + 1), address.ScriptPubKey));
 
@@ -484,18 +492,16 @@ namespace Stratis.Bitcoin.Tests.Wallet.Common
 
         public static List<Block> AddBlocksWithCoinbaseToChain(Network network, ConcurrentChain chain, HdAddress address, int blocks = 1)
         {
-            //var chain = new ConcurrentChain(network.GetGenesis().Header);
-
             var blockList = new List<Block>();
 
             for (int i = 0; i < blocks; i++)
             {
-                Block block = new Block();
+                Block block = network.Consensus.ConsensusFactory.CreateBlock();
                 block.Header.HashPrevBlock = chain.Tip.HashBlock;
                 block.Header.Bits = block.Header.GetWorkRequired(network, chain.Tip);
                 block.Header.UpdateTime(DateTimeOffset.UtcNow, network, chain.Tip);
 
-                var coinbase = new Transaction();
+                Transaction coinbase = network.CreateTransaction();
                 coinbase.AddInput(TxIn.CreateCoinbase(chain.Height + 1));
                 coinbase.AddOutput(new TxOut(network.GetReward(chain.Height + 1), address.ScriptPubKey));
 

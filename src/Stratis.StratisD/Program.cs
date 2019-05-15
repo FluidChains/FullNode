@@ -1,44 +1,42 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp;
-using NBitcoin;
 using NBitcoin.Protocol;
+using Stratis.Bitcoin;
 using Stratis.Bitcoin.Builder;
 using Stratis.Bitcoin.Configuration;
 using Stratis.Bitcoin.Features.Api;
+using Stratis.Bitcoin.Features.Apps;
 using Stratis.Bitcoin.Features.BlockStore;
 using Stratis.Bitcoin.Features.Consensus;
 using Stratis.Bitcoin.Features.MemoryPool;
 using Stratis.Bitcoin.Features.Miner;
 using Stratis.Bitcoin.Features.RPC;
-using Stratis.Bitcoin.Features.Wallet;
+using Stratis.Bitcoin.Features.ColdStaking;
+using Stratis.Bitcoin.Networks;
 using Stratis.Bitcoin.Utilities;
 
 namespace Stratis.StratisD
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            MainAsync(args).Wait();
-        }
-
-        public static async Task MainAsync(string[] args)
+        public static async Task Main(string[] args)
         {
             try
             {
-                NodeSettings nodeSettings = new NodeSettings(protocolVersion:ProtocolVersion.ALT_PROTOCOL_VERSION, args:args, loadConfiguration:false);
+                var nodeSettings = new NodeSettings(networksSelector: Networks.Stratis, protocolVersion: ProtocolVersion.PROVEN_HEADER_VERSION, args: args)
+                {
+                    MinProtocolVersion = ProtocolVersion.ALT_PROTOCOL_VERSION
+                };
 
-                // NOTES: running BTC and STRAT side by side is not possible yet as the flags for serialization are static
-                var node = new FullNodeBuilder()
+                IFullNode node = new FullNodeBuilder()
                     .UseNodeSettings(nodeSettings)
-                    .UsePosConsensus()
                     .UseBlockStore()
+                    .UsePosConsensus()
                     .UseMempool()
-                    .UseWallet()
+                    .UseColdStakingWallet()
                     .AddPowPosMining()
                     .UseApi()
+                    .UseApps()
                     .AddRPC()
                     .Build();
 
@@ -47,7 +45,7 @@ namespace Stratis.StratisD
             }
             catch (Exception ex)
             {
-                Console.WriteLine("There was a problem initializing the node. Details: '{0}'", ex.Message);
+                Console.WriteLine("There was a problem initializing the node. Details: '{0}'", ex.ToString());
             }
         }
     }

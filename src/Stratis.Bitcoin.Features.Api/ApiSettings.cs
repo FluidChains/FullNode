@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text;
 using System.Timers;
-using Stratis.Bitcoin.Configuration;
-using Stratis.Bitcoin.Utilities;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using Stratis.Bitcoin.Configuration;
+using Stratis.Bitcoin.Utilities;
 
 namespace Stratis.Bitcoin.Features.Api
 {
@@ -28,6 +28,9 @@ namespace Stratis.Bitcoin.Features.Api
         /// <summary>The default port used by the API when the node runs on the Stratis network.</summary>
         public const string DefaultApiHost = "http://localhost";
 
+        /// <summary>Instance logger.</summary>
+        private readonly ILogger logger;
+
         /// <summary>URI to node's API interface.</summary>
         public Uri ApiUri { get; set; }
 
@@ -37,33 +40,46 @@ namespace Stratis.Bitcoin.Features.Api
         /// <summary>URI to node's API interface.</summary>
         public Timer KeepaliveTimer { get; private set; }
 
-        /// <summary>The callback used to override/constrain/extend the settings provided by the Load method.</summary>
-        private Action<ApiSettings> callback;
-
         /// <summary>
-        /// Constructs this object whilst providing a callback to override/constrain/extend 
-        /// the settings provided by the Load method.
+        /// The HTTPS certificate file path.
         /// </summary>
-        /// <param name="callback">The callback used to override/constrain/extend the settings provided by the Load method.</param>
-        public ApiSettings(Action<ApiSettings> callback)
-        {
-            this.callback = callback;
-        }
-
+        /// <remarks>
+        /// Password protected certificates are not supported. On MacOs, only p12 certificates can be used without password.
+        /// Please refer to .Net Core documentation for usage: <seealso cref="https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.-ctor?view=netcore-2.1#System_Security_Cryptography_X509Certificates_X509Certificate2__ctor_System_Byte___" />.
+        /// </remarks>
+        public string HttpsCertificateFilePath { get; set; }
+        
+        /// <summary>Use HTTPS or not.</summary>
+        public bool UseHttps { get; set; }
+    
         /// <summary>
-        /// Loads the API related settings from the application configuration.
+        /// Initializes an instance of the object from the node configuration.
         /// </summary>
-        /// <param name="nodeSettings">Application configuration.</param>
-        public void Load(NodeSettings nodeSettings)
+        /// <param name="nodeSettings">The node configuration.</param>
+        public ApiSettings(NodeSettings nodeSettings)
         {
+            Guard.NotNull(nodeSettings, nameof(nodeSettings));
+
+            this.logger = nodeSettings.LoggerFactory.CreateLogger(typeof(ApiSettings).FullName);    
+
             TextFileConfiguration config = nodeSettings.ConfigReader;
 
-            var apiHost = config.GetOrDefault("apiuri", DefaultApiHost);
-            Uri apiUri = new Uri(apiHost);
+            this.UseHttps = config.GetOrDefault("usehttps", false);
+            this.HttpsCertificateFilePath = config.GetOrDefault("certificatefilepath", (string)null);
+
+            if (this.UseHttps && string.IsNullOrWhiteSpace(this.HttpsCertificateFilePath))
+                throw new ConfigurationException("The path to a certificate needs to be provided when using https. Please use the argument 'certificatefilepath' to provide it.");
+
+            var defaultApiHost = this.UseHttps 
+                ? DefaultApiHost.Replace(@"http://", @"https://") 
+                : DefaultApiHost;
+
+            string apiHost = config.GetOrDefault("apiuri", defaultApiHost, this.logger);
+            var apiUri = new Uri(apiHost);
 
             // Find out which port should be used for the API.
-            var apiPort = config.GetOrDefault("apiport", GetDefaultPort(nodeSettings.Network));
-            
+            int apiPort = config.GetOrDefault("apiport", GetDefaultPort(nodeSettings.Network), this.logger);
+
             // If no port is set in the API URI.
             if (apiUri.IsDefaultPort)
             {
@@ -78,7 +94,7 @@ namespace Stratis.Bitcoin.Features.Api
             }
 
             // Set the keepalive interval (set in seconds).
-            var keepAlive = config.GetOrDefault("keepalive", 0);
+            int keepAlive = config.GetOrDefault("keepalive", 0, this.logger);
             if (keepAlive > 0)
             {
                 this.KeepaliveTimer = new Timer
@@ -87,8 +103,6 @@ namespace Stratis.Bitcoin.Features.Api
                     Interval = keepAlive * 1000
                 };
             }
-
-            this.callback?.Invoke(this);
         }
 
         /// <summary>
@@ -110,11 +124,13 @@ namespace Stratis.Bitcoin.Features.Api
         {
             var builder = new StringBuilder();
 
-            builder.AppendLine($"-apiuri=<string>          URI to node's API interface. Defaults to '{ DefaultApiHost }'.");
-            builder.AppendLine($"-apiport=<0-65535>        Port of node's API interface. Defaults to { GetDefaultPort(network) }.");
-            builder.AppendLine($"-keepalive=<seconds>      Keep Alive interval (set in seconds). Default: 0 (no keep alive).");
+            builder.AppendLine($"-apiuri=<string>                  URI to node's API interface. Defaults to '{ DefaultApiHost }'.");
+            builder.AppendLine($"-apiport=<0-65535>                Port of node's API interface. Defaults to { GetDefaultPort(network) }.");
+            builder.AppendLine($"-keepalive=<seconds>              Keep Alive interval (set in seconds). Default: 0 (no keep alive).");
+            builder.AppendLine($"-usehttps=<bool>                  Use https protocol on the API. Defaults to false.");
+            builder.AppendLine($"-certificatefilepath=<string>     Path to the certificate used for https traffic encryption. Defaults to <null>. Password protected files are not supported. On MacOs, only p12 certificates can be used without password.");
 
-            NodeSettings.Default().Logger.LogInformation(builder.ToString());
+            NodeSettings.Default(network).Logger.LogInformation(builder.ToString());
         }
 
         /// <summary>
@@ -125,12 +141,17 @@ namespace Stratis.Bitcoin.Features.Api
         public static void BuildDefaultConfigurationFile(StringBuilder builder, Network network)
         {
             builder.AppendLine("####API Settings####");
-            builder.AppendLine($"#URI to node's API interface. Defaults to '{ DefaultApiHost }'");
+            builder.AppendLine($"#URI to node's API interface. Defaults to '{ DefaultApiHost }'.");
             builder.AppendLine($"#apiuri={ DefaultApiHost }");
-            builder.AppendLine($"#Port of node's API interface. Defaults to { GetDefaultPort(network) }");
+            builder.AppendLine($"#Port of node's API interface. Defaults to { GetDefaultPort(network) }.");
             builder.AppendLine($"#apiport={ GetDefaultPort(network) }");
-            builder.AppendLine($"#Keep Alive interval (set in seconds). Default: 0 (no keep alive)");
+            builder.AppendLine($"#Keep Alive interval (set in seconds). Default: 0 (no keep alive).");
             builder.AppendLine($"#keepalive=0");
+            builder.AppendLine($"#Use HTTPS protocol on the API. Default is false.");
+            builder.AppendLine($"#usehttps=false");
+            builder.AppendLine($"#Path to the file containing the certificate to use for https traffic encryption. Password protected files are not supported. On MacOs, only p12 certificates can be used without password.");
+            builder.AppendLine(@"#Please refer to .Net Core documentation for usage: 'https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.-ctor?view=netcore-2.1#System_Security_Cryptography_X509Certificates_X509Certificate2__ctor_System_Byte___'.");
+            builder.AppendLine($"#certificatefilepath=");
         }
     }
 }

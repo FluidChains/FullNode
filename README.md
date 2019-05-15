@@ -59,7 +59,6 @@ Our full node is currently in alpha.
 git clone https://github.com/exofoundation/CivXFullNode.git
 cd StratisBitcoinFullNode\src
 
-dotnet restore
 dotnet build
 
 ```
@@ -84,16 +83,3 @@ There is a lot to do and we welcome contributers developers and testers who want
 Testing
 -------
 * [Testing Guidelines](Documentation/testing-guidelines.md)
-
-CI build
------------
-
-We use [AppVeyor](https://www.appveyor.com/) for our CI build and to create nuget packages.
-Every time someone pushes to the master branch or create a pull request on it, a build is triggered and new nuget packages are created.
-
-To skip a build, for example if you've made very minor changes, include the text **[skip ci]** or **[ci skip]** in your commits' comment (with the squared brackets).
-
-If you want get the :sparkles: latest :sparkles: (and unstable :bomb:) version of the nuget packages here: 
-* [Stratis.Bitcoin](https://ci.appveyor.com/api/projects/stratis/stratisbitcoinfullnode/artifacts/nuget/Stratis.Bitcoin.1.0.7-alpha.nupkg?job=Configuration%3A%20Release)
-
-

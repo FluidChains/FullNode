@@ -1,41 +1,60 @@
-﻿using Moq;
-using NBitcoin;
-using Stratis.Bitcoin.Signals;
+﻿using NBitcoin;
+using Stratis.Bitcoin.Primitives;
+using Stratis.Bitcoin.Tests.Common;
 using Xunit;
 
 namespace Stratis.Bitcoin.Tests.Signals
 {
     public class SignalsTest
     {
-        private Mock<ISignaler<Block>> blockSignaler;
-        private Bitcoin.Signals.Signals signals;
-        private Mock<ISignaler<Transaction>> transactionSignaler;
+        private readonly Bitcoin.Signals.ISignals signals;
 
         public SignalsTest()
         {
-            this.blockSignaler = new Mock<ISignaler<Block>>();
-            this.transactionSignaler = new Mock<ISignaler<Transaction>>();
-            this.signals = new Bitcoin.Signals.Signals(this.blockSignaler.Object, this.transactionSignaler.Object);
+            this.signals = new Bitcoin.Signals.Signals();
         }
 
         [Fact]
         public void SignalBlockBroadcastsToBlockSignaler()
         {
-            var block = new Block();
+            Block block = KnownNetworks.StratisMain.CreateBlock();
+            ChainedHeader header = ChainedHeadersHelper.CreateGenesisChainedHeader();
+            var chainedHeaderBlock = new ChainedHeaderBlock(block, header);
 
-            this.signals.SignalBlock(block);
+            bool signaled = false;
+            this.signals.OnBlockConnected.Attach(headerBlock => signaled = true);
 
-            this.blockSignaler.Verify(b => b.Broadcast(block), Times.Exactly(1));
+            this.signals.OnBlockConnected.Notify(chainedHeaderBlock);
+
+            Assert.True(signaled);
+        }
+
+        [Fact]
+        public void SignalBlockDisconnectedToBlockSignaler()
+        {
+            Block block = KnownNetworks.StratisMain.CreateBlock();
+            ChainedHeader header = ChainedHeadersHelper.CreateGenesisChainedHeader();
+            var chainedHeaderBlock = new ChainedHeaderBlock(block, header);
+
+            bool signaled = false;
+            this.signals.OnBlockDisconnected.Attach(headerBlock => signaled = true);
+
+            this.signals.OnBlockDisconnected.Notify(chainedHeaderBlock);
+
+            Assert.True(signaled);
         }
 
         [Fact]
         public void SignalTransactionBroadcastsToTransactionSignaler()
         {
-            var transaction = new Transaction();
+            Transaction transaction = KnownNetworks.StratisMain.CreateTransaction();
 
-            this.signals.SignalTransaction(transaction);
+            bool signaled = false;
+            this.signals.OnTransactionReceived.Attach(transaction1 => signaled = true);
 
-            this.transactionSignaler.Verify(b => b.Broadcast(transaction), Times.Exactly(1));
+            this.signals.OnTransactionReceived.Notify(transaction);
+
+            Assert.True(signaled);
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using NBitcoin;
 using Stratis.Bitcoin.Configuration;
+using Stratis.Bitcoin.Networks;
 using Stratis.Bitcoin.Tests.Common;
 using Xunit;
 
@@ -10,7 +9,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 {
     public class RPCSettingsTest : TestBase
     {
-        public RPCSettingsTest() : base(Network.TestNet)
+        public RPCSettingsTest() : base(KnownNetworks.TestNet)
         {
         }
 
@@ -18,7 +17,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
         public void Load_ValidNodeSettings_UpdatesRpcSettingsFromNodeSettings()
         {
             string dir = CreateTestDir(this);
-            var confFile = Path.Combine(dir, "bitcoin.conf");
+            string confFile = Path.Combine(dir, "bitcoin.conf");
             var configLines = new List<string>()
             {
                 "server=true",
@@ -31,10 +30,9 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
             WriteConfigurationToFile(confFile, configLines);
 
-            var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+            var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-            var rpcSettings = new RpcSettings();
-            rpcSettings.Load(nodeSettings);
+            var rpcSettings = new RpcSettings(nodeSettings);
 
             Assert.True(rpcSettings.Server);
             Assert.Equal(1378, rpcSettings.RPCPort);
@@ -47,41 +45,18 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
             Assert.NotEmpty(rpcSettings.AllowIp);
             Assert.Equal("0.0.0.0", rpcSettings.AllowIp[0].ToString());
         }
-
-        [Fact]
-        public void Load_ValidNodeSettings_CallbackConfigured_InvokesCallback()
-        {
-            string dir = CreateTestDir(this);
-            var confFile = Path.Combine(dir, "bitcoin.conf");
-            var configLines = new List<string>() { "" };
-            WriteConfigurationToFile(confFile, configLines);
-
-            var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
-
-            var callbackCalled = false;
-            Action<RpcSettings> callback = (RpcSettings settings) =>
-            {
-                callbackCalled = true;
-            };
-
-            var rpcSettings = new RpcSettings(callback);
-            rpcSettings.Load(nodeSettings);
-
-            Assert.True(callbackCalled);
-        }
-
+        
         [Fact]
         public void Load_DefaultConfiguration_UsesDefaultNodeSettings()
         {
             string dir = CreateTestDir(this);
-            var confFile = Path.Combine(dir, "bitcoin.conf");
+            string confFile = Path.Combine(dir, "bitcoin.conf");
             var configLines = new List<string>() { "" };
             WriteConfigurationToFile(confFile, configLines);
 
-            var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+            var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-            var rpcSettings = new RpcSettings();
-            rpcSettings.Load(nodeSettings);
+            var rpcSettings = new RpcSettings(nodeSettings);
 
             Assert.False(rpcSettings.Server);
             Assert.Equal(18332, rpcSettings.RPCPort);
@@ -98,7 +73,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
             Assert.Throws<ConfigurationException>(() =>
             {
                 string dir = CreateTestDir(this);
-                var confFile = Path.Combine(dir, "bitcoin.conf");
+                string confFile = Path.Combine(dir, "bitcoin.conf");
                 var configLines = new List<string>()
                 {
                     "server=true",
@@ -107,10 +82,9 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
                 WriteConfigurationToFile(confFile, configLines);
 
-                var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+                var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-                var rpcSettings = new RpcSettings();
-                rpcSettings.Load(nodeSettings);
+                var rpcSettings = new RpcSettings(nodeSettings);
             });
         }
 
@@ -120,7 +94,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
             Assert.Throws<ConfigurationException>(() =>
             {
                 string dir = CreateTestDir(this);
-                var confFile = Path.Combine(dir, "bitcoin.conf");
+                string confFile = Path.Combine(dir, "bitcoin.conf");
                 var configLines = new List<string>()
                 {
                     "server=true",
@@ -129,10 +103,9 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
                 WriteConfigurationToFile(confFile, configLines);
 
-                var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+                var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-                var rpcSettings = new RpcSettings();
-                rpcSettings.Load(nodeSettings);
+                var rpcSettings = new RpcSettings(nodeSettings);
             });
         }
 
@@ -142,7 +115,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
             Assert.Throws<ConfigurationException>(() =>
             {
                 string dir = CreateTestDir(this);
-                var confFile = Path.Combine(dir, "bitcoin.conf");
+                string confFile = Path.Combine(dir, "bitcoin.conf");
                 var configLines = new List<string>()
                 {
                     "server=true",
@@ -154,10 +127,9 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
                 WriteConfigurationToFile(confFile, configLines);
 
-                var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+                var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-                var rpcSettings = new RpcSettings();
-                rpcSettings.Load(nodeSettings);
+                var rpcSettings = new RpcSettings(nodeSettings);
             });
         }
 
@@ -167,7 +139,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
             Assert.Throws<ConfigurationException>(() =>
             {
                 string dir = CreateTestDir(this);
-                var confFile = Path.Combine(dir, "bitcoin.conf");
+                string confFile = Path.Combine(dir, "bitcoin.conf");
                 var configLines = new List<string>()
                 {
                     "server=true",
@@ -179,10 +151,9 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
                 WriteConfigurationToFile(confFile, configLines);
 
-                var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+                var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-                var rpcSettings = new RpcSettings();
-                rpcSettings.Load(nodeSettings);
+                var rpcSettings = new RpcSettings(nodeSettings);
             });
         }
 
@@ -190,7 +161,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
         public void GetUrls_BindsConfigured_ReturnsBindUrls()
         {
             string dir = CreateTestDir(this);
-            var confFile = Path.Combine(dir, "bitcoin.conf");
+            string confFile = Path.Combine(dir, "bitcoin.conf");
             var configLines = new List<string>()
             {
                 "server=true",
@@ -203,11 +174,10 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
             WriteConfigurationToFile(confFile, configLines);
 
-            var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+            var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-            var rpcSettings = new RpcSettings();
-            rpcSettings.Load(nodeSettings);
-            var urls = rpcSettings.GetUrls();
+            var rpcSettings = new RpcSettings(nodeSettings);
+            string[] urls = rpcSettings.GetUrls();
 
             Assert.NotEmpty(urls);
             Assert.Equal("http://127.0.0.1:1378/", urls[0]);
@@ -217,7 +187,7 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
         public void GetUrls_NoBindsConfigured_ReturnsEmptyArray()
         {
             string dir = CreateTestDir(this);
-            var confFile = Path.Combine(dir, "bitcoin.conf");
+            string confFile = Path.Combine(dir, "bitcoin.conf");
             var configLines = new List<string>()
             {
                 ""
@@ -225,10 +195,10 @@ namespace Stratis.Bitcoin.Features.RPC.Tests
 
             WriteConfigurationToFile(confFile, configLines);
 
-            var nodeSettings = new NodeSettings(Network.TestNet, args:new string[] { "-conf=" + confFile });
+            var nodeSettings = new NodeSettings(this.Network, args:new string[] { "-conf=" + confFile });
 
-            var rpcSettings = new RpcSettings();
-            var urls = rpcSettings.GetUrls();
+            var rpcSettings = new RpcSettings(new NodeSettings(this.Network));
+            string[] urls = rpcSettings.GetUrls();
 
             Assert.Empty(urls);
         }

@@ -1,101 +1,67 @@
 ﻿using System;
+using System.Collections.Generic;
 using NBitcoin;
-using Stratis.Bitcoin.Utilities;
+using Stratis.Bitcoin.Primitives;
 
 namespace Stratis.Bitcoin.Signals
 {
-    /// <summary>
-    /// Provider of notifications of new blocks and transactions.
-    /// </summary>
     public interface ISignals
     {
-        /// <summary>
-        /// Notify subscribers about a new block being available.
-        /// </summary>
-        /// <param name="block">Newly added block.</param>
-        void SignalBlock(Block block);
+        /// <summary>Event that is executed when a block is connected to a consensus chain.</summary>
+        EventNotifier<ChainedHeaderBlock> OnBlockConnected { get; }
 
-        /// <summary>
-        /// Notify subscribers about a new transaction being available.
-        /// </summary>
-        /// <param name="trx">Newly added transaction.</param>
-        void SignalTransaction(Transaction trx);
+        /// <summary>Event that is executed when a block is disconnected from a consensus chain.</summary>
+        EventNotifier<ChainedHeaderBlock> OnBlockDisconnected { get; }
 
-        /// <summary>
-        /// Subscribes to receive notifications when a new block is available.
-        /// </summary>
-        /// <param name="observer">Observer to be subscribed to receive signaler's messages.</param>
-        /// <returns>Disposable object to allow observer to unsubscribe from the signaler.</returns>
-        IDisposable SubscribeForBlocks(IObserver<Block> observer);
-
-        /// <summary>
-        /// Subscribes to receive notifications when a new transaction is available.
-        /// </summary>
-        /// <param name="observer">Observer to be subscribed to receive signaler's messages.</param>
-        /// <returns>Disposable object to allow observer to unsubscribe from the signaler.</returns>
-        IDisposable SubscribeForTransactions(IObserver<Transaction> observer);
+        /// <summary>Event that is executed when a transaction is received from another peer.</summary>
+        EventNotifier<Transaction> OnTransactionReceived { get; }
     }
 
-    /// <inheritdoc />
     public class Signals : ISignals
     {
-        /// <summary>
-        /// Initializes the object with newly created instances of signalers.
-        /// </summary>
-        public Signals() : this(new Signaler<Block>(), new Signaler<Transaction>())
+        public Signals()
         {
-        }
-
-        /// <summary>
-        /// Initializes the object with specific signalers.
-        /// </summary>
-        /// <param name="blockSignaler">Signaler providing notifications about newly available blocks to its subscribers.</param>
-        /// <param name="transactionSignaler">Signaler providing notifications about newly available transactions to its subscribers.</param>
-        public Signals(ISignaler<Block> blockSignaler, ISignaler<Transaction> transactionSignaler)
-        {
-            Guard.NotNull(blockSignaler, nameof(blockSignaler));
-            Guard.NotNull(transactionSignaler, nameof(transactionSignaler));
-
-            this.blocks = blockSignaler;
-            this.transactions = transactionSignaler;
-        }
-
-        /// <summary>Signaler providing notifications about newly available blocks to its subscribers.</summary>
-        private ISignaler<Block> blocks { get; }
-
-        /// <summary>Signaler providing notifications about newly available transactions to its subscribers.</summary>
-        private ISignaler<Transaction> transactions { get; }
-
-        /// <inheritdoc />
-        public void SignalBlock(Block block)
-        {
-            Guard.NotNull(block, nameof(block));
-
-            this.blocks.Broadcast(block);
+            this.OnBlockConnected = new EventNotifier<ChainedHeaderBlock>();
+            this.OnBlockDisconnected = new EventNotifier<ChainedHeaderBlock>();
+            this.OnTransactionReceived = new EventNotifier<Transaction>();
         }
 
         /// <inheritdoc />
-        public void SignalTransaction(Transaction trx)
-        {
-            Guard.NotNull(trx, nameof(trx));
-
-            this.transactions.Broadcast(trx);
-        }
+        public EventNotifier<ChainedHeaderBlock> OnBlockConnected { get; private set; }
 
         /// <inheritdoc />
-        public IDisposable SubscribeForBlocks(IObserver<Block> observer)
-        {
-            Guard.NotNull(observer, nameof(observer));
-
-            return this.blocks.Subscribe(observer);
-        }
+        public EventNotifier<ChainedHeaderBlock> OnBlockDisconnected { get; private set; }
 
         /// <inheritdoc />
-        public IDisposable SubscribeForTransactions(IObserver<Transaction> observer)
-        {
-            Guard.NotNull(observer, nameof(observer));
+        public EventNotifier<Transaction> OnTransactionReceived { get; private set; }
+    }
 
-            return this.transactions.Subscribe(observer);
+    public class EventNotifier<T>
+    {
+        private readonly List<Action<T>> callbacks;
+
+        public EventNotifier()
+        {
+            this.callbacks = new List<Action<T>>();
+        }
+
+        /// <summary>Registers a callback which will be invoked when <see cref="Notify"/> is called.</summary>
+        public void Attach(Action<T> callback)
+        {
+            this.callbacks.Add(callback);
+        }
+
+        /// <summary>Unregisters a callback.</summary>
+        public void Detach(Action<T> callback)
+        {
+            this.callbacks.Remove(callback);
+        }
+
+        /// <summary>Executes all registered callbacks.</summary>
+        public void Notify(T item)
+        {
+            foreach (Action<T> callback in this.callbacks)
+                callback(item);
         }
     }
 }
