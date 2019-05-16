@@ -1,4 +1,4 @@
-CivXFullNode
+EXOSFullNode
 ===============
 
 https://civxeconomy.com/
@@ -6,9 +6,9 @@ https://civxeconomy.com/
 Bitcoin Implementation in C#
 ----------------------------
 
-CivX is an implementation of the Bitcoin protocol in C# on the [.NET Core](https://dotnet.github.io/) platform.  
-The node can run on the Bitcoin and CivX networks.  
-CivX token is based on the [NBitcoin](https://github.com/MetacoSA/NBitcoin) project and [Stratis](https://github.com/stratisproject/StratisBitcoinFullNode) project.
+EXOS is an implementation of the Bitcoin protocol in C# on the [.NET Core](https://dotnet.github.io/) platform.  
+The node can run on the Bitcoin and EXOS networks.  
+EXOS token is based on the [NBitcoin](https://github.com/MetacoSA/NBitcoin) project and [Stratis](https://github.com/stratisproject/StratisBitcoinFullNode) project.
 
 [.NET Core](https://dotnet.github.io/) is an open source cross platform framework and enables the development of applications and services on Windows, macOS and Linux.  
 Join our community on [Discord](https://discord.gg/eCNMCMt).  
