@@ -1,0 +1,64 @@
+version: "3.4"
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - 80:3000
+    networks:
+      - monitoring
+    volumes:
+      - grafana-volume:/var/lib/grafana
+      - ./Docker/Node.Stats/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+      - ./Docker/Node.Stats/grafana/logs:/var/log/grafana
+      - ./Docker/Node.Stats/grafana/plugins:/opt/grafana/plugins
+      - ./Docker/Node.Stats/grafana/plugins:/var/lib/grafana/plugins
+      - ./Docker/Node.Stats/grafana/provisioning:/etc/grafana/provisioning
+      - ./Docker/Node.Stats/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./Docker/Node.Stats/fav32.png:/usr/share/grafana/public/img/fav32.png
+      - ./Docker/Node.Stats/grafana_icon.svg:/usr/share/grafana/public/img/grafana_icon.svg
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    hostname: influxdb
+    restart: always
+    ports:
+      - 8086:8086
+    networks:
+      - monitoring
+    volumes:
+      - influxdb-volume:/var/lib/influxdb
+      - ./Docker/Node.Stats/influxdb/conf:/etc/influxdb
+      - ./Docker/Node.Stats/influxdb/logs:/var/log/influxdb
+    depends_on:
+      - grafana
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    restart: always
+    volumes:
+      - ./Docker/Node.Stats/telegraf/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+      - ./Docker/Node.Stats/telegraf/logs:/var/log/telegraf
+    network_mode: host
+    depends_on: 
+      - influxdb
+  exos_fullnode:
+    build:
+     context: .
+     dockerfile: Dockerfile
+    container_name: exos_fullnode
+    restart: always
+    network_mode: host
+    volumes:
+      - ./Docker/Node.Stats/exos.conf.docker:/root/.stratisnode/exos/EXOSMain/exos.conf
+      - /root/.stratisnode/exos:/root/.stratisnode/exos
+    depends_on:
+      - telegraf
+networks:
+  monitoring:
+volumes:
+  grafana-volume:
+    external: false
+  influxdb-volume:
+    external: false
