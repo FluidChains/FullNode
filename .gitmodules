@@ -1,0 +1,4 @@
+[submodule "Docker/Node.Stats/grafana/plugins/piechart-panel"]
+	path = Docker/Node.Stats/grafana/plugins/piechart-panel
+	url = https://github.com/grafana/piechart-panel
+
