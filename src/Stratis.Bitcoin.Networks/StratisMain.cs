@@ -25,6 +25,10 @@ namespace Stratis.Bitcoin.Networks
         /// <summary> The default name used for the Stratis configuration file. </summary>
         public const string StratisDefaultConfigFilename = "exos.conf";
 
+        public const string StatsHost = "127.0.0.1";
+
+        public const int StatsPort = 8125;
+
         public StratisMain()
         {
             // The message start string is designed to be unlikely to occur in normal data.
@@ -207,10 +211,12 @@ namespace Stratis.Bitcoin.Networks
             }
 
             this.StandardScriptsRegistry = new StratisStandardScriptsRegistry();
-
+            
             Assert(this.Consensus.HashGenesisBlock == uint256.Parse("00000036090a68c523471da7a4f0f958c1b4403fef74a003be7f71877699cab7"));
             Assert(this.Genesis.Header.HashMerkleRoot == uint256.Parse("0x85c4a8a116eb457ff74bb64908e71c6780bff7e69ad3dadc9df6cd753c21f937"));
-        }
+
+           
+        }   
 
         protected static Block CreateStratisGenesisBlock(ConsensusFactory consensusFactory, uint nTime, uint nNonce, uint nBits, int nVersion, Money genesisReward)
         {

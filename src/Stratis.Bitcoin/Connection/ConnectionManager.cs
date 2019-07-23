@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using StatsN;
 using Stratis.Bitcoin.Configuration;
 using Stratis.Bitcoin.Configuration.Logging;
 using Stratis.Bitcoin.Configuration.Settings;
@@ -227,6 +228,8 @@ namespace Stratis.Bitcoin.Connection
 
         private void AddComponentStats(StringBuilder builder)
         {
+            IStatsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = Networks.StratisMain.StatsHost, Port = Networks.StratisMain.StatsPort }); 
+
             long totalRead = 0;
             long totalWritten = 0;
             var peerBuilder = new StringBuilder();
@@ -257,6 +260,21 @@ namespace Stratis.Bitcoin.Connection
             builder.AppendLine();
             builder.AppendLine($"======Connection====== agent {this.Parameters.UserAgent} [in:{inbound} out:{this.ConnectedPeers.Count() - inbound}] [recv: {totalRead.BytesToMegaBytes()} MB sent: {totalWritten.BytesToMegaBytes()} MB]");
             builder.AppendLine(peerBuilder.ToString());
+
+            // Call Stats Peers
+            var listAgents = this.ConnectedPeers
+                 .Select(agentNode => agentNode.PeerVersion.UserAgent.ToString())
+                 .GroupBy(agentsNodes => agentsNodes)
+                 .Select(agent => new { Name = agent, Count = agent.Count() });
+
+            foreach (var result in listAgents)
+            {
+               statsd.GaugeAsync(result.Name.Key.Replace(":", "_"), result.Count);
+            }
+
+            statsd.GaugeAsync("Peers", this.ConnectedPeers.Count());
+            statsd.GaugeAsync("Peers.Outbound", this.ConnectedPeers.Count() - inbound);
+            statsd.GaugeAsync("Peers.Inbound", inbound);
         }
 
         private string ToKBSec(ulong bytesPerSec)

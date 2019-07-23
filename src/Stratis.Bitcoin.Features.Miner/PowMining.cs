@@ -12,6 +12,7 @@ using Stratis.Bitcoin.Interfaces;
 using Stratis.Bitcoin.Mining;
 using Stratis.Bitcoin.Primitives;
 using Stratis.Bitcoin.Utilities;
+using StatsN;
 
 namespace Stratis.Bitcoin.Features.Miner
 {
@@ -286,7 +287,18 @@ namespace Stratis.Bitcoin.Features.Miner
 
             context.ChainedHeaderBlock = new ChainedHeaderBlock(context.BlockTemplate.Block, chainedHeader);
 
+            StatsPoW(context);
+
             return true;
+        }
+
+        private static void StatsPoW(MineBlockContext context)
+        {
+            //Start Graphics
+            IStatsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = Networks.StratisMain.StatsHost, Port = Networks.StratisMain.StatsPort }); 
+            statsd.GaugeAsync("HashRate", Convert.ToInt64(context.ChainTip.ChainWork));
+
+            //End Graphics
         }
 
         private void OnBlockMined(MineBlockContext context)

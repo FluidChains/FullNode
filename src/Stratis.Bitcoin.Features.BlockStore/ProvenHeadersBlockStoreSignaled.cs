@@ -7,6 +7,7 @@ using Stratis.Bitcoin.Interfaces;
 using Stratis.Bitcoin.Primitives;
 using Stratis.Bitcoin.Signals;
 using Stratis.Bitcoin.Utilities;
+using StatsN;
 
 namespace Stratis.Bitcoin.Features.BlockStore
 {
@@ -79,12 +80,19 @@ namespace Stratis.Bitcoin.Features.BlockStore
 
                         // A reorg happened so we recreate a new Proven Header to replace the wrong one.
                         this.CreateAndStoreProvenHeader(blockHeight, blockPair, isIBD);
+
                     }
                 }
             }
 
             // At the end, if no exception happened, control is passed back to base AddBlockToQueue.
             base.AddBlockToQueue(blockPair, isIBD);
+            // Call Stats
+            StatsBlocks(blockHeight, blockPair);
+           
+            //var pow = this.network.Consensus.PremineReward + getMoneySupplyPoW + blockHeight;
+            //Console.WriteLine("MoneySupplyTotal:  "+ pow);
+
         }
 
         /// <summary>
@@ -104,6 +112,9 @@ namespace Stratis.Bitcoin.Features.BlockStore
 
             this.logger.LogTrace("Created Proven Header at height {0} with hash {1} and adding to the pending batch to be stored.", blockHeight, provenHeaderHash);
 
+            // Start Graphics
+            
+
             // If our node is in IBD the block will not be announced to peers.
             // If not in IBD the signaler may expect the block header to be of type PH.
             // TODO: Memory foot print:
@@ -114,6 +125,19 @@ namespace Stratis.Bitcoin.Features.BlockStore
             // in ProvenHeadersBlockStoreBehavior and load the PH from the PH store instead
             if (!isIBD)
                 chainedHeaderBlock.SetHeader(newProvenHeader);
+        }
+
+        private void StatsBlocks(long blockHeight, ChainedHeaderBlock blockPair)
+        {
+            IStatsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = Networks.StratisMain.StatsHost, Port = Networks.StratisMain.StatsPort }); 
+
+            statsd.GaugeAsync("BlockSize", blockPair.Block.BlockSize.Value);
+            statsd.GaugeAsync("TXinBlock", blockPair.Block.Transactions.Count);
+            statsd.GaugeAsync("BlockChainWork",blockPair.ChainedHeader.ChainWork.Size);
+            statsd.CountAsync("getBlock.count");
+            statsd.GaugeAsync("block.height", blockHeight);
+
+
         }
     }
 }

@@ -11,6 +11,7 @@ using Stratis.Bitcoin.Interfaces;
 using Stratis.Bitcoin.Primitives;
 using Stratis.Bitcoin.Utilities;
 using Stratis.Bitcoin.Utilities.Extensions;
+using StatsN;
 
 namespace Stratis.Bitcoin.Features.BlockStore
 {
@@ -89,6 +90,10 @@ namespace Stratis.Bitcoin.Features.BlockStore
 
         private Exception saveAsyncLoopException;
 
+        Networks.StratisMain stratisMain = new Networks.StratisMain();
+        private int moneySupplyBPoS = 0;
+        private  MoneySupply moneySupply;
+
         public BlockStoreQueue(
             ConcurrentChain chain,
             IChainState chainState,
@@ -116,9 +121,8 @@ namespace Stratis.Bitcoin.Features.BlockStore
             this.logger = loggerFactory.CreateLogger(this.GetType().FullName);
             this.cancellation = new CancellationTokenSource();
             this.saveAsyncLoopException = null;
-
             this.BatchThresholdSizeBytes = storeSettings.MaxCacheSize * 1024 * 1024;
-
+            this.moneySupply = new MoneySupply();
             nodeStats.RegisterStats(this.AddComponentStats, StatsType.Component);
         }
 
@@ -330,10 +334,33 @@ namespace Stratis.Bitcoin.Features.BlockStore
                 }
 
                 this.BlockStoreCacheTip = chainedHeaderBlock.ChainedHeader;
+                
+                if (this.storeTip.Height >= this.stratisMain.Consensus.LastPOWBlock)
+                {
+                    StatsMoneySupply(chainedHeaderBlock);
+                }
+
+                
             }
 
             this.blocksQueue.Enqueue(chainedHeaderBlock);
             this.blocksQueueSizeBytes += chainedHeaderBlock.Block.BlockSize.Value;
+        }
+
+        private void StatsMoneySupply(ChainedHeaderBlock chainedHeaderBlock)
+        {
+            IStatsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = Networks.StratisMain.StatsHost, Port = Networks.StratisMain.StatsPort });
+            
+
+            if (this.moneySupplyBPoS == 0)
+            {
+                this.moneySupplyBPoS = this.moneySupply.GetMoneySupplyPoW(this.chain);
+            }
+            var preMineValue = this.stratisMain.Consensus.PremineReward / 100000000;
+            var rewardValueFixed = chainedHeaderBlock.ChainedHeader.Height - this.moneySupply.NetworkParameters.Consensus.LastPOWBlock;
+            var totalMoneySupply = preMineValue + this.moneySupplyBPoS + rewardValueFixed;
+            statsd.GaugeAsync("MoneySupply", totalMoneySupply);
+
         }
 
         /// <summary>
