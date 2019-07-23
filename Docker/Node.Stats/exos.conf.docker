@@ -20,13 +20,13 @@
 #This can be used to accept incoming connections when -connect is specified.
 #forcelisten=1
 #Specified node to connect to. Can be specified multiple times.
-connect=192.168.0.56:4562
+#connect= 
 #Add a node to connect to and attempt to keep the connection open. Can be specified multiple times.
 #addnode=
 #Bind to given address. Use [host]:port notation for IPv6. Can be specified multiple times.
 #bind=<ip:port>
 #Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6. Can be specified multiple times.
-#whitebind=192.168.0.56
+#whitebind=
 #Whitelist peers having the given IP:port address, both inbound or outbound. Can be specified multiple times.
 #whitelist=
 #Specify your own public address.
