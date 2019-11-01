@@ -12,6 +12,7 @@ using NBitcoin;
 using NBitcoin.BitcoinCore;
 using Stratis.Bitcoin.Configuration;
 using Stratis.Bitcoin.Utilities;
+usinf StatsN;
 
 namespace Stratis.Bitcoin.Features.Consensus.CoinViews
 {
@@ -41,6 +42,8 @@ namespace Stratis.Bitcoin.Features.Consensus.CoinViews
         private readonly DBreezeEngine dBreeze;
 
         private DBreezeSerializer dBreezeSerializer;
+        
+        private ulong utxoBridge = 0;
 
         /// <summary>
         /// Initializes a new instance of the object.
@@ -141,6 +144,15 @@ namespace Stratis.Bitcoin.Features.Consensus.CoinViews
                 using (DBreeze.Transactions.Transaction transaction = this.CreateTransaction())
                 {
                     transaction.SynchronizeTables("BlockHash", "Coins");
+                    
+                     var allutxo = transaction.Count("Coins");
+                     if (allutxo != this.utxoBridge)
+                        {
+                            IStatsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = "127.0.0.1", Port = 8125 });
+                            statsd.GaugeAsync("utxo", (long)allutxo);
+                            this.utxoBridge = allutxo;
+                        }
+                        
                     transaction.ValuesLazyLoadingIsOn = false;
 
                     using (new StopwatchDisposable(o => this.performanceCounter.AddQueryTime(o)))
