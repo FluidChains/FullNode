@@ -12,7 +12,7 @@ using NBitcoin;
 using NBitcoin.BitcoinCore;
 using Stratis.Bitcoin.Configuration;
 using Stratis.Bitcoin.Utilities;
-usinf StatsN;
+using StatsN;
 
 namespace Stratis.Bitcoin.Features.Consensus.CoinViews
 {
