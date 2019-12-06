@@ -14,23 +14,30 @@ namespace Stratis.Bitcoin.Utilities
         public int GetMoneySupplyPoW(ConcurrentChain chain)
         {
             var poWLast = this.NetworkParameters.Consensus.LastPOWBlock;
-            var blockMined = 0;
+            var poWReward = this.NetworkParameters.Consensus.ProofOfWorkReward / 100000000;
+            var poSReward = this.NetworkParameters.Consensus.ProofOfStakeReward / 100000000;
+            var blockMined = 1;
             int poWMoneySupply = 0;
             while (blockMined <= poWLast)
             {
+
                 if (chain.GetBlock(blockMined).Header.CheckProofOfWork() == false)
                 {
-                    poWMoneySupply++;
+                    poWMoneySupply += (int)poSReward;
                 }
                 else
                 {
-                    poWMoneySupply += 12;
+                    if (chain.GetBlock(blockMined).Height != 2)
+                    {
+                        poWMoneySupply += (int)poWReward;
+                    }
+
                 }
 
                 blockMined++;
             }
 
-            return poWMoneySupply ;
+            return poWMoneySupply;
         }
 
     }
