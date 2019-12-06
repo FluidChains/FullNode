@@ -357,7 +357,7 @@ namespace Stratis.Bitcoin.Features.BlockStore
                 this.moneySupplyBPoS = this.moneySupply.GetMoneySupplyPoW(this.chain);
             }
             var preMineValue = this.stratisMain.Consensus.PremineReward / 100000000;
-            var rewardValueFixed = chainedHeaderBlock.ChainedHeader.Height - this.moneySupply.NetworkParameters.Consensus.LastPOWBlock;
+            var rewardValueFixed = chainedHeaderBlock.ChainedHeader.Height - this.moneySupply.NetworkParameters.Consensus.LastPOWBlock - 1;
             var totalMoneySupply = preMineValue + this.moneySupplyBPoS + rewardValueFixed;
             statsd.GaugeAsync("MoneySupply", totalMoneySupply);
 
