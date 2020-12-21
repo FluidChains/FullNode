@@ -40,6 +40,10 @@ namespace Blockcore.Node
                 case "EXOS":
                     nodeSettings = new NodeSettings(networksSelector: OpenExo.Networks.Networks.OpenExo, args: args);
                     break;
+
+                case "DIVER":
+                    nodeSettings = new NodeSettings(networksSelector: Divergenti.Networks.Networks.Divergenti, args: args);
+                    break;
             }
 
             return nodeSettings;

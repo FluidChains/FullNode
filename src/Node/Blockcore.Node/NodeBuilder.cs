@@ -30,6 +30,7 @@ namespace Blockcore.Node
                 case "STRAT":
                 case "RUTA":
                 case "EXOS":
+                case "DIVER":
                 case "X42":
                 case "XDS":
                     nodeBuilder.UsePosConsensus().AddPowPosMining().UseColdStakingWallet();
