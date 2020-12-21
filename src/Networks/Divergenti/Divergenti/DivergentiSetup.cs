@@ -36,7 +36,7 @@ namespace Divergenti
             DefaultRPCPort = 3451,
             DefaultAPIPort = 39320,
             DefaultSignalRPort = 39820,
-            PubKeyAddress = 39,  // D https://en.bitcoin.it/wiki/List_of_address_prefixes
+            PubKeyAddress = 30,  // D https://en.bitcoin.it/wiki/List_of_address_prefixes
             ScriptAddress = 90, // d
             SecretAddress = 158,
             GenesisTime = 1608582080,
@@ -63,7 +63,7 @@ namespace Divergenti
             DefaultRPCPort = 3451,
             DefaultAPIPort = 39320,
             DefaultSignalRPort = 39820,
-            PubKeyAddress = 39,  // D https://en.bitcoin.it/wiki/List_of_address_prefixes
+            PubKeyAddress = 30,  // D https://en.bitcoin.it/wiki/List_of_address_prefixes
             ScriptAddress = 90, // d
             SecretAddress = 158,
             GenesisTime = 1608582080,
