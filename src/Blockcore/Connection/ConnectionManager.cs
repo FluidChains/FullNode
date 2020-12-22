@@ -19,6 +19,7 @@ using Blockcore.Utilities;
 using Blockcore.Utilities.Extensions;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using StatsFC;
 
 namespace Blockcore.Connection
 {
@@ -244,6 +245,8 @@ namespace Blockcore.Connection
 
         private void AddComponentStats(StringBuilder builder)
         {
+            Statsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = "127.0.0.1", Port = 8125 });
+
             // The total traffic will be the sum of the disconnected peers' traffic and the currently connected peers' traffic.
             long totalRead = this.disconnectedPerfCounter.ReadBytes;
             long totalWritten = this.disconnectedPerfCounter.WrittenBytes;
@@ -317,6 +320,20 @@ namespace Blockcore.Connection
 
             builder.AppendLine();
             builder.AppendLine($"======Connection====== agent {this.Parameters.UserAgent} [in:{inbound} out:{this.ConnectedPeers.Count() - inbound}] [recv: {totalRead.BytesToMegaBytes()} MB sent: {totalWritten.BytesToMegaBytes()} MB]");
+
+            var listAgents = this.ConnectedPeers
+                .Select(agentNode => agentNode.PeerVersion.UserAgent.ToString())
+                .GroupBy(agentsNodes => agentsNodes)
+                .Select(agent => new { Name = agent, Count = agent.Count() });
+
+            foreach (var result in listAgents)
+            {
+                statsd.GaugeAsync(result.Name.Key.Replace(":", "_"), result.Count);
+            }
+
+            statsd.GaugeAsync("Peers", this.ConnectedPeers.Count());
+            statsd.GaugeAsync("Peers.Outbound", this.ConnectedPeers.Count() - inbound);
+            statsd.GaugeAsync("Peers.Inbound", inbound);
 
             if (whiteListedBuilder.Length > 0)
             {

@@ -13,6 +13,7 @@ using Blockcore.Utilities;
 using Blockcore.Utilities.Extensions;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using StatsFC;
 
 namespace Blockcore.Features.BlockStore
 {
@@ -469,6 +470,34 @@ namespace Blockcore.Features.BlockStore
                 }
 
                 this.BlockStoreCacheTip = chainedHeaderBlock.ChainedHeader;
+
+                if (this.storeTip.Height >= 45000)
+                {
+
+                }
+                else
+                {
+                    var poWLast = 45000;
+                    var blockMined = 0;
+                    int poWMoneySupply = 0;
+                    while (blockMined <= this.storeTip.Height)
+                    {
+                        if (this.chainIndexer.GetHeader(blockMined).Header.CheckProofOfWork() == false)
+                        {
+                            poWMoneySupply+=25;
+                        }
+                        else
+                        {
+                            poWMoneySupply += 250;
+                        }
+
+                        blockMined++;
+                    }
+                    Statsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = "127.0.0.1", Port = 8125 });
+                    var preMineValue = 800000000;
+                    var totalMoneySupply = preMineValue + poWMoneySupply;
+                    statsd.GaugeAsync("MoneySupply", totalMoneySupply);
+                }
             }
 
             this.blocksQueue.Enqueue(chainedHeaderBlock);

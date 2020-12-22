@@ -1,4 +1,5 @@
-﻿using Blockcore.AsyncWork;
+﻿using System;
+using Blockcore.AsyncWork;
 using Blockcore.Base;
 using Blockcore.Connection;
 using Blockcore.Interfaces;
@@ -7,6 +8,7 @@ using Blockcore.Signals;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using StatsFC;
 
 namespace Blockcore.Features.BlockStore
 {
@@ -86,6 +88,8 @@ namespace Blockcore.Features.BlockStore
 
             // At the end, if no exception happened, control is passed back to base AddBlockToQueue.
             base.AddBlockToQueue(blockPair, isIBD);
+
+            StatsBlocks(blockHeight, blockPair);
         }
 
         /// <summary>
@@ -115,6 +119,19 @@ namespace Blockcore.Features.BlockStore
             // in ProvenHeadersBlockStoreBehavior and load the PH from the PH store instead
             if (!isIBD)
                 chainedHeaderBlock.SetHeader(newProvenHeader);
+        }
+
+        private void StatsBlocks(long blockHeight, ChainedHeaderBlock blockPair)
+        {
+            Statsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = "127.0.0.1", Port = 8125 });
+
+            statsd.GaugeAsync("BlockSize", blockPair.Block.BlockSize.Value);
+            statsd.GaugeAsync("TXinBlock", blockPair.Block.Transactions.Count);
+            statsd.GaugeAsync("BlockChainWork", Convert.ToInt64(blockPair.ChainedHeader.ChainWork.GetLow32()));
+            statsd.CountAsync("getBlock.count");
+            statsd.GaugeAsync("block.height", blockHeight);
+
+
         }
     }
 }

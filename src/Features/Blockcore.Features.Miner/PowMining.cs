@@ -13,6 +13,7 @@ using Blockcore.Primitives;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+using StatsFC;
 
 namespace Blockcore.Features.Miner
 {
@@ -291,8 +292,20 @@ namespace Blockcore.Features.Miner
 
             context.ChainedHeaderBlock = new ChainedHeaderBlock(context.BlockTemplate.Block, chainedHeader);
 
+            StatsPoW(context);
+
             return true;
         }
+
+        private static void StatsPoW(MineBlockContext context)
+        {
+            //Start Graphics
+            Statsd statsd = Statsd.New(new StatsdOptions() { HostOrIp = "127.0.0.1", Port = 8125 });
+            statsd.GaugeAsync("HashRate", Convert.ToInt64(context.ChainTip.ChainWork));
+
+            //End Graphics
+        }
+
 
         private void OnBlockMined(MineBlockContext context)
         {

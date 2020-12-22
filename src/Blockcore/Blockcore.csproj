@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\External\NBitcoin\NBitcoin.csproj" />
+    <ProjectReference Include="..\External\StatsFC\StatsFC.csproj" />
   </ItemGroup>
 
   <ItemGroup>
