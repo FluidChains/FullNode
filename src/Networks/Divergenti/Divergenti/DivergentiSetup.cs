@@ -50,7 +50,14 @@ namespace Divergenti
             Nodes = new[] { "", "", "", "" },
             Checkpoints = new Dictionary<int, CheckpointInfo>
             {
-                
+                 {       0, new CheckpointInfo(new uint256("0x000006fc5033beab628af59aebc6d9c983e33014b9fc3dda51e4b6c9a0b58f5a"), new uint256("0x0000000000000000000000000000000000000000000000000000000000000000")) },
+                 {       2, new CheckpointInfo(new uint256("0xd16981abb754dcffc0812756bb4bedfeba43a80b7bd675b4563bd5d72344eb91"), new uint256("0xca0214716e5a2e8f54f08f42d1e79d48c35f3f141e2790d8a69fe138bda8b3eb")) }, //Premine
+                 {      10, new CheckpointInfo(new uint256("0x140726d04676fbc95a38c6c9d77b90581395b974e9ee39dbcf2a4496628ee12a"), new uint256("0xc3e88926170bd0d6c65a5d1fe9fa2b6653133c8cb70c5b4ce4606719791895ce")) },
+                 {     100, new CheckpointInfo(new uint256("0x0780097ff2fbc7c22af23610806a1455ecd9f8646ebfa4f9bcfda278ba2c6432"), new uint256("0x8e9541c7399f94e3d0082f2e88aafde6c9d8c914a372d0c39f4a02e75385368b")) },
+                 {    1000, new CheckpointInfo(new uint256("0xc896ceb33aa41aad93d70160ddf0c3838034ac3c8f5c82577572fd991516aa87"), new uint256("0x4c644cf3335a00ae776063be85a9444ab7f539735efb58feb8866bd8815e33ee")) },
+                 {    5000, new CheckpointInfo(new uint256("0xf6aa7c8201f0373dc28bbf4208cb0297a3046bb0cf3dbd0bd30b79b7e6c48ecc"), new uint256("0xc5d2d5bfb9d8f15b0c79cfc2c7a3bf9e859416ae986134cb1f31d18230e5daa3")) },
+                 {   10000, new CheckpointInfo(new uint256("0x547ad33d55aa90705baab1a9292a36bfb4353fdf00c35e51e2f718bbd8d2df9a"), new uint256("0x9fccfea09c623c42f70224dbce3ff7e02a09ced3f373ba089ec7795e4f85d662")) },
+                 {   20000, new CheckpointInfo(new uint256("0xb39e47f9cb09cf75146cfaea624d3a5605365e97b4975c89dbdc100589a99471"), new uint256("0x49f8b242334ba4e5acc3a2713d3531115791215287028c1c9fdc7ad3a0b5b951")) }
             }
         };
 
