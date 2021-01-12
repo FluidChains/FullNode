@@ -47,7 +47,7 @@ namespace Divergenti
             HashGenesisBlock = "000006fc5033beab628af59aebc6d9c983e33014b9fc3dda51e4b6c9a0b58f5a",
             HashMerkleRoot = "7e78875e1156338aef1f0c5f833e1495b0cbb76143110bf7709c0b4d21c2df5b",
             DNS = new[] { "seednode1.divergenti.cloud", "seednode2.divergenti.network", "seednode3.divergenti.cloud", "seednode4.divergenti.network" },
-            Nodes = new[] { "", "", "", "" },
+            Nodes = new[] { "vps311.divergenti.network", "vps211.divergenti.network", "vps312.divergenti.cloud", "vps212.divergenti.cloud" },
             Checkpoints = new Dictionary<int, CheckpointInfo>
             {
                  {       0, new CheckpointInfo(new uint256("0x000006fc5033beab628af59aebc6d9c983e33014b9fc3dda51e4b6c9a0b58f5a"), new uint256("0x0000000000000000000000000000000000000000000000000000000000000000")) },
