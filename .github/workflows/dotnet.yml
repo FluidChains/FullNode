@@ -61,7 +61,7 @@ jobs:
       run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m ${{env.SOLUTION_PATH}}
 
     - name: Publish
-      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ./bin/publish ${{env.PROJECT_PATH}}
+      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ./src/Networks/Divergenti/Divergenti.Node/bin/publish ${{env.PROJECT_PATH}}
 
     - name: Package Name
       run: |
