@@ -160,7 +160,7 @@ namespace Divergenti.Networks
 
             Checkpoints = network.Checkpoints;
             DNSSeeds = network.DNS.Select(dns => new DNSSeedData(dns, dns)).ToList();
-            SeedNodes = network.Nodes.Select(node => new NBitcoin.Protocol.NetworkAddress(IPAddress.Parse(Dns.GetHostAddresses(node).GetValue(0).ToString()), network.DefaultPort)).ToList();
+            //SeedNodes = network.Nodes.Select(node => new NBitcoin.Protocol.NetworkAddress(IPAddress.Parse(Dns.GetHostAddresses(node).GetValue(0).ToString()), network.DefaultPort)).ToList();
 
             StandardScriptsRegistry = new DivergentiStandardScriptRegistry();
 
