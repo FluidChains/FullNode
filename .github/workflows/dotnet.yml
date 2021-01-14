@@ -31,7 +31,7 @@ jobs:
     env:
       PROJECT_NAME: 'Divergenti.Node'
       SOLUTION_PATH: 'src/Blockcore.sln'
-      PROJECT_PATH: 'src/Networks/Divergenti/Divergenti.Node.csproj'
+      PROJECT_PATH: 'src/Networks/Divergenti/Divergenti.Node/Divergenti.Node.csproj'
       BUILD_CONFIGURATION: 'Release'
 
     steps:
