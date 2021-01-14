@@ -57,7 +57,12 @@ jobs:
     - name: Restore
       run: dotnet restore ${{env.SOLUTION_PATH}}
 
-    - name: Build
+    - name: Build (Mac)
+      if: matrix.os == 'macos-latest'
+      run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -v m ${{env.SOLUTION_PATH}} 
+    
+    - name: Build others
+      if: matrix.os != 'macos-latest'
       run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m ${{env.SOLUTION_PATH}}
 
     - name: Publish
