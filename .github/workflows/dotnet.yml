@@ -77,16 +77,16 @@ jobs:
     - name: Package (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        echo RELEASE_PATH=./src/${{env.PROJECT_NAME}}/bin/publish/${{env.RELEASE_NAME}} >> $GITHUB_ENV
+        echo RELEASE_PATH=./src/Networks/Divergenti/${{env.PROJECT_NAME}}/bin/publish/${{env.RELEASE_NAME}} >> $GITHUB_ENV
         cd ./src/${{env.PROJECT_NAME}}/bin/publish/
         tar cvzf ${{env.RELEASE_NAME}} *
     - name: Package (Windows)
       if: matrix.os == 'windows-latest'
-      run: Compress-Archive -Path .\src\${{env.PROJECT_NAME}}\bin\publish\* -DestinationPath .\${{env.RELEASE_NAME}}
+      run: Compress-Archive -Path .\src\Networks\Divergenti\${{env.PROJECT_NAME}}\bin\publish\* -DestinationPath .\${{env.RELEASE_NAME}}
 
     - name: Package (Mac)
       if: matrix.os == 'macos-latest'
-      run: zip -j -r ${{env.RELEASE_NAME}} ./src/${{env.PROJECT_NAME}}/bin/publish/
+      run: zip -j -r ${{env.RELEASE_NAME}} ./src/Networks/Divergenti/${{env.PROJECT_NAME}}/bin/publish/
 
     - name: Release
       uses: sondreb/action-release@master
