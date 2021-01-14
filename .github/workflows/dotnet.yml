@@ -52,8 +52,11 @@ jobs:
     - name: Setup .NET Core (${{ matrix.dotnet_version }})
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet_version }}
-
+        dotnet-version: ${{ matrix.dotnet_version }} 
+    
+    - name: Clean
+      run: dotnet clean ${{env.SOLUTION_PATH}} --configuration Release && dotnet nuget locals all --clear
+    
     - name: Restore
       run: dotnet restore ${{env.SOLUTION_PATH}}
 
