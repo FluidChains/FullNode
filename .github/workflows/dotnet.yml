@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-latest, macos-latest ]
+        chain: ['DIVER','EXOS','RUTA']
         include:
           - chain: DIVER
             name: "Divergenti.Node"
