@@ -13,6 +13,19 @@ jobs:
       matrix:
         os: [ windows-latest, ubuntu-latest, macos-latest ]
         include:
+          - chain: DIVER
+            name: "Divergenti.Node"
+            project: "src/Networks/Divergenti/Divergenti.Node/Divergenti.Node.csproj"
+            publishF: "./src/Networks/Divergenti/Divergenti.Node/Divergenti.Node/bin/publish"          
+          - chain: EXOS
+            name: "OpenExo.Node"
+            project: "src/Networks/OpenExo/OpenExo.Node/OpenExo.Node.csproj"
+            publishF: "./src/Networks/OpenExo/OpenExo.Node/OpenExo.Node/bin/publish"          
+          - chain: RUTA
+            name: "Rutanio.Node"
+            project: "src/Networks/Rutanio/Rutanio.Node/Rutanio.Node.csproj"
+            publishF: "./src/Networks/Rutanio/Rutanio.Node/Rutanio.Node/bin/publish" 
+          
           - os: windows-latest
             extension: ".zip"
             runtime: "win-x64"
@@ -29,9 +42,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     env:
-      PROJECT_NAME: 'Divergenti.Node'
+      PROJECT_NAME: '${{ matrix.name }}'
       SOLUTION_PATH: 'src/Blockcore.sln'
-      PROJECT_PATH: 'src/Networks/Divergenti/Divergenti.Node/Divergenti.Node.csproj'
+      PROJECT_PATH: '${{ matrix.project }}'
       BUILD_CONFIGURATION: 'Release'
 
     steps:
@@ -69,7 +82,7 @@ jobs:
       run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m ${{env.SOLUTION_PATH}}
 
     - name: Publish
-      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ./src/Networks/Divergenti/Divergenti.Node/bin/publish ${{env.PROJECT_PATH}}
+      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ${{ matrix.publishF }} ${{env.PROJECT_PATH}}
 
     - name: Package Name
       run: |
@@ -85,16 +98,16 @@ jobs:
     - name: Package (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        echo RELEASE_PATH=./src/Networks/Divergenti/${{env.PROJECT_NAME}}/bin/publish/${{env.RELEASE_NAME}} >> $GITHUB_ENV
-        cd ./src/Networks/Divergenti/${{env.PROJECT_NAME}}/bin/publish/
+        echo RELEASE_PATH= ${{matrix.publishF}}/${{env.RELEASE_NAME}} >> $GITHUB_ENV
+        cd ${{matrix.publishF}}
         tar cvzf ${{env.RELEASE_NAME}} *
     - name: Package (Windows)
       if: matrix.os == 'windows-latest'
-      run: Compress-Archive -Path .\src\Networks\Divergenti\${{env.PROJECT_NAME}}\bin\publish\* -DestinationPath .\${{env.RELEASE_NAME}}
+      run: Compress-Archive -Path ${{matrix.publishF}}/* -DestinationPath .\${{env.RELEASE_NAME}}
 
     - name: Package (Mac)
       if: matrix.os == 'macos-latest'
-      run: zip -j -r ${{env.RELEASE_NAME}} ./src/Networks/Divergenti/${{env.PROJECT_NAME}}/bin/publish/
+      run: zip -j -r ${{env.RELEASE_NAME}} ${{matrix.publishF}}
 
     - name: Release Package
       uses: sondreb/action-release@master
@@ -104,5 +117,5 @@ jobs:
         draft: true
         prerelease: true
         body: ''
-        name: "Divergenti (Release ${{env.VERSION}})"
-        tag: v${{env.VERSION}}
+        name: "Nodes (Release ${{env.VERSION}})"
+        tag: ${{env.VERSION}}
