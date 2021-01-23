@@ -57,7 +57,9 @@ namespace Divergenti
                  {    1000, new CheckpointInfo(new uint256("0xc896ceb33aa41aad93d70160ddf0c3838034ac3c8f5c82577572fd991516aa87"), new uint256("0x4c644cf3335a00ae776063be85a9444ab7f539735efb58feb8866bd8815e33ee")) },
                  {    5000, new CheckpointInfo(new uint256("0xf6aa7c8201f0373dc28bbf4208cb0297a3046bb0cf3dbd0bd30b79b7e6c48ecc"), new uint256("0xc5d2d5bfb9d8f15b0c79cfc2c7a3bf9e859416ae986134cb1f31d18230e5daa3")) },
                  {   10000, new CheckpointInfo(new uint256("0x547ad33d55aa90705baab1a9292a36bfb4353fdf00c35e51e2f718bbd8d2df9a"), new uint256("0x9fccfea09c623c42f70224dbce3ff7e02a09ced3f373ba089ec7795e4f85d662")) },
-                 {   20000, new CheckpointInfo(new uint256("0xb39e47f9cb09cf75146cfaea624d3a5605365e97b4975c89dbdc100589a99471"), new uint256("0x49f8b242334ba4e5acc3a2713d3531115791215287028c1c9fdc7ad3a0b5b951")) }
+                 {   20000, new CheckpointInfo(new uint256("0xb39e47f9cb09cf75146cfaea624d3a5605365e97b4975c89dbdc100589a99471"), new uint256("0x49f8b242334ba4e5acc3a2713d3531115791215287028c1c9fdc7ad3a0b5b951")) },
+                 {   30000, new CheckpointInfo(new uint256("0xce5c11e707c786eec52ed7a5a4b4b5ac343303a3296806eac44e98222a65e85c"), new uint256("0x08e76676b23aca3b3470cbba882cb0e306874e45be391e90dca6e54ff0958632")) },
+                 {   40000, new CheckpointInfo(new uint256("0x63dff0f67cd80d814b5610d3150c40a07d33685896a4d4452f38b31ee2a12d35"), new uint256("0x2f045f3eeab70e47bfdafa5322fb4939a80919ccecda45ea356398f6aff4c2db")) }
             }
         };
 
