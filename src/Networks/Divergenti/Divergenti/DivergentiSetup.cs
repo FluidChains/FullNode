@@ -23,7 +23,7 @@ namespace Divergenti
             LastPowBlock = 45000,
             GenesisText = "https://www.bbc.com/news/science-environment-55364664",
             TargetSpacing = TimeSpan.FromSeconds(64),
-            ProofOfStakeTimestampMask = 0x0000003F, // 0x0000003F // 64 sec
+            ProofOfStakeTimestampMask = 0x0000000F, // 0x0000003F // 64 sec
             PoSVersion = 4
         };
 
