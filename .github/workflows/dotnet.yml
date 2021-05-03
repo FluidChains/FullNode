@@ -1,0 +1,117 @@
+name: Package Release
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  
+  buildTestRelease:
+
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        chain: ['DIVER','EXOS','RUTA']
+        include:
+          - chain: DIVER
+            name: "Divergenti.Node"
+          - chain: EXOS
+            name: "OpenExo.Node"
+          - chain: RUTA
+            name: "Rutanio.Node"
+          
+          - os: windows-latest
+            extension: ".zip"
+            runtime: "win-x64"
+          - os: ubuntu-latest
+            extension: ".tar.gz"
+            runtime: "linux-x64"
+          - os: macos-latest
+            runtime: "osx-x64"
+            extension: ".zip"
+        node_version: [12.x]
+        dotnet_version: ['3.1']
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    
+    env:
+      PROJECT_NAME: '${{ matrix.name }}'
+      SOLUTION_PATH: 'src/Blockcore.sln'
+      PROJECT_PATH: 'src/Node/Blockcore.Node/Blockcore.Node.csproj'
+      PUBLISH_PATH: 'src/Node/Blockcore.Node/bin/publish'
+      BUILD_CONFIGURATION: 'Release'
+
+    steps:
+
+    - uses: actions/checkout@v1
+      name: Checkout
+
+    - name: Setup Node.js (${{ matrix.node_version }})
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node_version }}
+
+    - name: Variables
+      run: |
+        echo VERSION=$(npm run version --silent) >> $GITHUB_ENV
+      shell: bash
+
+    - name: Setup .NET Core (${{ matrix.dotnet_version }})
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet_version }} 
+    
+    - name: Clean
+      run: dotnet clean ${{env.SOLUTION_PATH}} --configuration Release && dotnet nuget locals all --clear
+    
+    - name: Restore
+      run: dotnet restore ${{env.SOLUTION_PATH}}
+
+    - name: Build (Mac)
+      if: matrix.os == 'macos-latest'
+      run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -v m ${{env.SOLUTION_PATH}} 
+    
+    - name: Build others
+      if: matrix.os != 'macos-latest'
+      run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m ${{env.SOLUTION_PATH}}
+
+    - name: Publish
+      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ${{ env.PUBLISH_PATH }} ${{env.PROJECT_PATH}}
+
+    - name: Package Name
+      run: |
+        echo RELEASE_NAME=${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
+        echo RELEASE_PATH=${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
+      shell: bash
+
+#    - name: Package Name
+#      run: |
+#        echo "::set-env name=RELEASE_NAME::${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
+#        echo "::set-env name=RELEASE_PATH::${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
+
+    - name: Package (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        echo RELEASE_PATH= ${{env.PUBLISH_PATH}}/${{env.RELEASE_NAME}} >> $GITHUB_ENV
+        cd ${{env.PUBLISH_PATH}}
+        tar cvzf ${{env.RELEASE_NAME}} *
+    - name: Package (Windows)
+      if: matrix.os == 'windows-latest'
+      run: Compress-Archive -Path ${{env.PUBLISH_PATH}}/* -DestinationPath .\${{env.RELEASE_NAME}}
+
+    - name: Package (Mac)
+      if: matrix.os == 'macos-latest'
+      run: zip -j -r ${{env.RELEASE_NAME}} ${{env.PUBLISH_PATH}}
+
+    - name: Release Package
+      uses: sondreb/action-release@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: "${{env.RELEASE_PATH}}"
+        draft: true
+        prerelease: true
+        body: ''
+        name: "Nodes (Release ${{env.VERSION}})"
+        tag: ${{env.VERSION}}
