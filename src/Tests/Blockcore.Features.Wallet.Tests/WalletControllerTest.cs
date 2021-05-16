@@ -1031,6 +1031,7 @@ namespace Blockcore.Features.Wallet.Tests
         /// <summary>
         /// Tests that when a transaction has been sent that has multiple inputs to form the transaction these duplicate spending details do not show up multiple times in the history.
         /// </summary>
+
         [Fact]
         public void GetHistoryWithDuplicateSpentTransactionsSelectsDistinctsSpentTransactionsForDuplicates()
         {
