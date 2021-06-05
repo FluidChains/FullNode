@@ -8,13 +8,15 @@ using Blockcore.BlockPulling;
 using Blockcore.Configuration.Logging;
 using Blockcore.Configuration.Settings;
 using Blockcore.Connection;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.PerformanceCounters.ConsensusManager;
 using Blockcore.Consensus.ValidationResults;
 using Blockcore.Consensus.Validators;
 using Blockcore.EventBus.CoreEvents;
 using Blockcore.Interfaces;
+using Blockcore.Networks;
 using Blockcore.P2P.Peer;
-using Blockcore.Primitives;
 using Blockcore.Signals;
 using Blockcore.Utilities;
 using Blockcore.Utilities.Extensions;
@@ -1456,8 +1458,6 @@ namespace Blockcore.Consensus
 
                 log.AppendLine($"Tip Age: { TimeSpan.FromSeconds(tipAge).ToString(@"dd\.hh\:mm\:ss") } (maximum is { TimeSpan.FromSeconds(maxTipAge).ToString(@"dd\.hh\:mm\:ss") })");
                 log.AppendLine($"In IBD Stage: { (this.isIbd ? "Yes" : "No") }");
-
-                log.AppendLine($"Chained header tree size: {this.chainedHeaderTree.ChainedBlocksDataBytes.BytesToMegaBytes()} MB");
 
                 string unconsumedBlocks = this.FormatBigNumber(this.chainedHeaderTree.UnconsumedBlocksCount);
 

@@ -6,6 +6,8 @@ using Blockcore.Base;
 using Blockcore.Configuration;
 using Blockcore.Connection;
 using Blockcore.Consensus;
+using Blockcore.Consensus.Checkpoints;
+using Blockcore.Networks;
 using Blockcore.P2P.Peer;
 using Blockcore.Signals;
 using Blockcore.Tests.Common;
@@ -102,7 +104,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndDnsServerIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -114,7 +115,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndWhiteListManagerIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -126,7 +126,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndLoggerFactoryIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -138,7 +137,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndNodeLifetimeIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -150,7 +148,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndNodeSettingsIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -162,7 +159,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndDataFolderIsNull_ThenArgumentNullExceptionIsThrown()
         {
             // Arrange.
@@ -174,7 +170,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenConstructorCalled_AndAllParametersValid_ThenTypeCreated()
         {
             // Arrange.
@@ -185,7 +180,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenDnsFeatureInitialized_ThenDnsServerSuccessfullyStarts()
         {
             // Arrange.
@@ -209,7 +203,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenDnsFeatureStopped_ThenDnsServerSuccessfullyStops()
         {
             // Arrange.
@@ -240,7 +233,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenDnsServerFailsToStart_ThenDnsFeatureRetries()
         {
             // Arrange.
@@ -281,7 +273,6 @@ namespace Blockcore.Features.Dns.Tests
         }
 
         [Fact]
-        [Trait("DNS", "UnitTest")]
         public void WhenInitialize_ThenRefreshLoopIsStarted()
         {
             // Arrange.

@@ -11,14 +11,18 @@ using Blockcore.AsyncWork;
 using Blockcore.Configuration;
 using Blockcore.Configuration.Logging;
 using Blockcore.Consensus;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Controllers.Models;
 using Blockcore.Interfaces;
-using Blockcore.Primitives;
+using Blockcore.Networks;
 using Blockcore.Utilities;
 using LiteDB;
+using FileMode = LiteDB.FileMode;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
-using Script = NBitcoin.Script;
+using Script = Blockcore.Consensus.ScriptInfo.Script;
 
 namespace Blockcore.Features.BlockStore.AddressIndexing
 {
@@ -82,7 +86,7 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
 
         private LiteDatabase db;
 
-        private ILiteCollection<AddressIndexerTipData> tipDataStore;
+        private LiteCollection<AddressIndexerTipData> tipDataStore;
 
         /// <summary>A mapping between addresses and their balance changes.</summary>
         /// <remarks>All access should be protected by <see cref="lockObject"/>.</remarks>
@@ -175,7 +179,8 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
 
             string dbPath = Path.Combine(this.dataFolder.RootPath, AddressIndexerDatabaseFilename);
 
-            this.db = new LiteDatabase(new ConnectionString() { Filename = dbPath, Upgrade = true });
+            FileMode fileMode = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? FileMode.Exclusive : FileMode.Shared;
+            this.db = new LiteDatabase(new ConnectionString() { Filename = dbPath, Mode = fileMode });
 
             this.addressIndexRepository = new AddressIndexRepository(this.db, this.loggerFactory);
 
@@ -362,7 +367,9 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
                 AddressIndexerTipData tipData = this.tipDataStore.FindAll().FirstOrDefault();
 
                 if (tipData == null)
+                { 
                     tipData = new AddressIndexerTipData();
+                }
 
                 tipData.Height = this.IndexerTip.Height;
                 tipData.TipHashBytes = this.IndexerTip.HashBlock.ToBytes();
@@ -444,15 +451,22 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
                     if (amountSpent == 0)
                         continue;
 
-                    string address = this.scriptAddressReader.GetAddressFromScriptPubKey(this.network, new Script(consumedOutputData.ScriptPubKeyBytes));
+                    var address = this.scriptAddressReader.GetAddressFromScriptPubKey(this.network, new Script(consumedOutputData.ScriptPubKeyBytes));
 
-                    if (string.IsNullOrEmpty(address))
+                    if (address.IsNullOrEmpty())
                     {
                         // This condition need not be logged, as the address reader should be aware of all possible address formats already.
                         continue;
                     }
 
-                    this.ProcessBalanceChangeLocked(header.Height, address, amountSpent, false);
+                    if (address.Address != string.Empty)
+                        this.ProcessBalanceChangeLocked(header.Height, address.Address, amountSpent, false);
+
+                    if (address.HotAddress != string.Empty)
+                        this.ProcessBalanceChangeLocked(header.Height, address.HotAddress, amountSpent, false);
+
+                    if (address.ColdAddress != string.Empty)
+                        this.ProcessBalanceChangeLocked(header.Height, address.ColdAddress, amountSpent, false);
                 }
 
                 // Process outputs.
@@ -466,16 +480,23 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
                         if (amountReceived == 0 || txOut.IsEmpty || txOut.ScriptPubKey.IsUnspendable)
                             continue;
 
-                        string address = this.scriptAddressReader.GetAddressFromScriptPubKey(this.network, txOut.ScriptPubKey);
+                        var address = this.scriptAddressReader.GetAddressFromScriptPubKey(this.network, txOut.ScriptPubKey);
 
-                        if (string.IsNullOrEmpty(address))
+                        if (address.IsNullOrEmpty())
                         {
                             // This condition need not be logged, as the address reader should be aware of all
                             // possible address formats already.
                             continue;
                         }
 
-                        this.ProcessBalanceChangeLocked(header.Height, address, amountReceived, true);
+                        if (address.Address != string.Empty)
+                            this.ProcessBalanceChangeLocked(header.Height, address.Address, amountReceived, true);
+
+                        if (address.HotAddress != string.Empty)
+                            this.ProcessBalanceChangeLocked(header.Height, address.HotAddress, amountReceived, true);
+
+                        if (address.ColdAddress != string.Empty)
+                            this.ProcessBalanceChangeLocked(header.Height, address.ColdAddress, amountReceived, true);
                     }
                 }
 
@@ -491,7 +512,9 @@ namespace Blockcore.Features.BlockStore.AddressIndexing
 
                 // Remove outpoints that were consumed.
                 foreach (OutPoint consumedOutPoint in inputs.Select(x => x.PrevOut))
+                { 
                     this.outpointsRepository.RemoveOutPointData(consumedOutPoint);
+                }
             }
 
             return true;

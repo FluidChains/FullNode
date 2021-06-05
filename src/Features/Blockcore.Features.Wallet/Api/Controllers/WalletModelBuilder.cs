@@ -7,6 +7,7 @@ using Blockcore.Features.Wallet.Exceptions;
 using Blockcore.Features.Wallet.Helpers;
 using Blockcore.Features.Wallet.Interfaces;
 using Blockcore.Features.Wallet.Types;
+using Blockcore.Networks;
 using NBitcoin;
 
 namespace Blockcore.Features.Wallet.Api.Controllers
@@ -258,7 +259,8 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                                 sentItem.Payments.Add(new PaymentDetailModel
                                 {
                                     DestinationAddress = payment.DestinationAddress,
-                                    Amount = payment.Amount
+                                    Amount = payment.Amount,
+                                    PayToSelf = payment.PayToSelf
                                 });
 
                                 sentItem.Amount += payment.Amount;
@@ -324,7 +326,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
                 // Sort and filter the history items.
                 List<TransactionItemModel> itemsToInclude = transactionItems.OrderByDescending(t => t.Timestamp)
-                    .Where(x => String.IsNullOrEmpty(request.SearchQuery) || (x.Id.ToString() == request.SearchQuery || x.ToAddress == request.SearchQuery || x.Payments.Any(p => p.DestinationAddress == request.SearchQuery)))
+                    .Where(x => string.IsNullOrEmpty(request.SearchQuery) || (x.Id.ToString() == request.SearchQuery || x.ToAddress == request.SearchQuery || x.Payments.Any(p => p.DestinationAddress == request.SearchQuery)))
                     .Skip(request.Skip ?? 0)
                     .Take(request.Take ?? transactionItems.Count)
                     .ToList();

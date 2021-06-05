@@ -11,8 +11,10 @@ using Blockcore.Features.Wallet;
 using Blockcore.IntegrationTests.Common.EnvironmentMockUpHelpers;
 using Blockcore.IntegrationTests.Common.Extensions;
 using Blockcore.Interfaces;
+using Blockcore.Networks;
 using Blockcore.P2P;
 using NBitcoin;
+using Blockcore.Tests.Common;
 
 namespace Blockcore.IntegrationTests.Common.Runners
 {
@@ -33,7 +35,11 @@ namespace Blockcore.IntegrationTests.Common.Runners
             else
                 settings = new NodeSettings(this.Network, agent: this.Agent, args: new string[] { "-conf=bitcoin.conf", "-datadir=" + this.DataFolder });
 
+            var persistenceProviderManager = new TestPersistenceProviderManager(settings);
+
+
             var builder = new FullNodeBuilder()
+                            .UsePersistenceProviderMananger(persistenceProviderManager)
                             .UseNodeSettings(settings)
                             .UseBlockStore()
                             .UsePowConsensus()

@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Components;
 using System;
+using Microsoft.AspNetCore.Components;
 
-namespace BlazorModal.Services
+namespace Blockcore.UI.BlazorModal
 {
     public class ModalService
     {
@@ -18,12 +18,12 @@ namespace BlazorModal.Services
 
             var content = new RenderFragment(x => { x.OpenComponent(1, contentType); x.CloseComponent(); });
 
-            OnShow?.Invoke(title, content);
+            this.OnShow?.Invoke(title, content);
         }
 
         public void Close()
         {
-            OnClose?.Invoke();
+            this.OnClose?.Invoke();
         }
     }
 }

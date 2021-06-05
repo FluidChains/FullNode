@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Blockcore.Consensus.Chain;
 using Blockcore.IntegrationTests.Common;
 using Blockcore.IntegrationTests.Common.EnvironmentMockUpHelpers;
 using Blockcore.IntegrationTests.Common.Extensions;
@@ -6,7 +7,6 @@ using Blockcore.IntegrationTests.Common.ReadyData;
 using Blockcore.IntegrationTests.Common.TestNetworks;
 using Blockcore.Networks;
 using Blockcore.Networks.Bitcoin;
-using Blockcore.Primitives;
 using Blockcore.Tests.Common;
 using NBitcoin;
 using Xunit;
@@ -348,7 +348,6 @@ namespace Blockcore.IntegrationTests
                 Assert.Null(minerA.FullNode.ConsensusManager().Tip.FindAncestorOrSelf(badBlockOnMinerBChain));
                 TestBase.WaitLoop(() => minerA.FullNode.ConsensusManager().Tip.Height == 14);
                 TestBase.WaitLoop(() => minerB.FullNode.ConsensusManager().Tip.Height == 15);
-
             }
         }
 
@@ -369,7 +368,7 @@ namespace Blockcore.IntegrationTests
         {
             using (var builder = NodeBuilder.Create(this))
             {
-                var noValidationRulesNetwork = new BitcoinRegTestNoValidationRules("regtest1");
+                var noValidationRulesNetwork = new BitcoinRegTestNoValidationRules("regtest12");
 
                 var minerA = builder.CreateStratisPowNode(this.powNetwork, "cmfr-6-minerA").WithDummyWallet().Start();
                 var minerB = builder.CreateStratisPowNode(this.powNetwork, "cmfr-6-minerB").WithDummyWallet().Start();

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Blockcore.Base;
 using Blockcore.Consensus;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Controllers;
 using Blockcore.Controllers.Models;
 using Blockcore.Features.RPC;
@@ -14,6 +16,7 @@ using Blockcore.Features.Wallet.Types;
 using Blockcore.Features.WalletWatchOnly.Api.Models;
 using Blockcore.Features.WalletWatchOnly.Interfaces;
 using Blockcore.Interfaces;
+using Blockcore.Networks;
 using Blockcore.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using NBitcoin;
@@ -52,7 +55,9 @@ namespace Blockcore.Features.WalletWatchOnly.Api.Controllers
         /// <summary>
         /// The wallet name set by selectwallet method. This is static since the controller is a stateless type. This value should probably be cached by an injected service in the future.
         /// </summary>
+#pragma warning disable 649
         private static readonly string CurrentWalletName;
+#pragma warning restore 649
 
         /// <inheritdoc />
         public WatchOnlyWalleRPCController(

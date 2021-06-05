@@ -3,6 +3,7 @@
 @using Blockcore.Features.Wallet.Interfaces
 @using Blockcore.Features.Miner
 @using Blockcore.Features.Miner.Interfaces
+@using Blockcore.Networks
 @using NBitcoin
 
 @inject IWalletManager WalletManager
@@ -369,6 +370,7 @@ else
         this.MiningFeature.StartStaking(this.WalletName, this.Password);
 
         this.LoadStats();
+        await Task.CompletedTask;
     }
     private bool IsStarting { get; set; }
     private async Task callStartStaking()

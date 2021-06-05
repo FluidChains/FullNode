@@ -9,6 +9,7 @@ using Blockcore.Builder.Feature;
 using Blockcore.EventBus;
 using Blockcore.Features.NodeHost.Events;
 using Blockcore.Features.NodeHost.Hubs;
+using Blockcore.Networks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,8 +22,6 @@ namespace Blockcore.Features.NodeHost
     /// </summary>
     public sealed class NodeHostFeature : FullNodeFeature
     {
-        internal static Dictionary<Type, ClientEventBroadcasterSettings> eventBroadcasterSettings;
-
         /// <summary>How long we are willing to wait for the NodeHost to stop.</summary>
         private const int NodeHostStopTimeoutSeconds = 10;
 

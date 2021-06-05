@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Blockcore.Consensus;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Miner.Interfaces;
 using Blockcore.Features.Miner.Staking;
 using Blockcore.Features.Wallet;
@@ -71,7 +74,7 @@ namespace Blockcore.IntegrationTests.Miners
             using (var builder = NodeBuilder.Create(this))
             {
                 var configParameters = new NodeConfigParameters { { "savetrxhex", "true" } };
-                var network = new StratisRegTest();
+                var network = new StratisOverrideRegTest();
 
                 var minerA = builder.CreateStratisPosNode(network, "stake-1-minerA", configParameters: configParameters).OverrideDateTimeProvider().WithWallet().Start();
 

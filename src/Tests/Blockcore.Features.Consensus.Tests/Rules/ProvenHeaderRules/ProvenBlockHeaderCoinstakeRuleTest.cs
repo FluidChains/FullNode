@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Blockcore.Consensus;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.ScriptInfo;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Consensus.CoinViews;
 using Blockcore.Features.Consensus.Rules.ProvenHeaderRules;
 using Blockcore.Tests.Common;
@@ -391,6 +395,7 @@ namespace Blockcore.Features.Consensus.Tests.Rules.ProvenHeaderRules
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void RunRule_ProvenHeadersActive_And_InvalidMerkleProof_BadMerkleProofErrorIsThrown()
         {
             // Setup previous chained header.

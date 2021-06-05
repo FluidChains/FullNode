@@ -8,6 +8,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using AspNetCore.Http.Extensions;
 using Blockcore.Connection;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Controllers.Models;
 using Blockcore.Features.NodeHost;
 using Blockcore.Features.Miner.Api.Controllers;
@@ -456,7 +458,7 @@ namespace Blockcore.IntegrationTests.API
             commands.Should().Contain(x => x.Command == "walletpassphrase <passphrase> <timeout>");
             commands.Should().Contain(x => x.Command == "walletlock");
             commands.Should().Contain(x => x.Command == "getwalletinfo");
-            commands.Should().Contain(x => x.Command == "sendtoaddress <address> <amount> <commenttx> <commentdest>");
+            commands.Should().Contain(x => x.Command == "sendtoaddress <address> <amount> <commenttx> <commentdest> [<fee>] [<issegwit>]");
             commands.Should().Contain(x => x.Command == "sendrawtransaction <hex>");
             commands.Should().Contain(x => x.Command == "getnewaddress [<account>] [<addresstype>]");
             commands.Should().Contain(x => x.Command == "getunusedaddress <account> <addresstype>");
@@ -501,8 +503,8 @@ namespace Blockcore.IntegrationTests.API
         private void general_information_about_the_wallet_and_node_is_returned()
         {
             var generalInfoResponse = JsonDataSerializer.Instance.Deserialize<WalletGeneralInfoModel>(this.responseText);
-            generalInfoResponse.WalletFilePath.Should().ContainAll(StratisRegTest, $"{WalletName}.wallet.json");
-            generalInfoResponse.Network.Name.Should().Be(StratisRegTest);
+            generalInfoResponse.WalletFilePath.Should().ContainAll(this.posNetwork.Name, $"{WalletName}.wallet.json");
+            generalInfoResponse.Network.Name.Should().Be(this.posNetwork.Name);
             generalInfoResponse.ChainTip.Should().Be(0);
             generalInfoResponse.IsChainSynced.Should().BeFalse();
             generalInfoResponse.ConnectedNodes.Should().Be(0);

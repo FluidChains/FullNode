@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Blockcore.Configuration.Logging;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.BlockStore.AddressIndexing;
 using LiteDB;
 using NBitcoin;
@@ -20,7 +21,8 @@ namespace Blockcore.Features.BlockStore.Tests
 
         public AddressIndexerOutpointsRepositoryTests()
         {
-            var db = new LiteDatabase(new ConnectionString() { Filename = this.RandomString(20) + ".litedb", Upgrade = true });
+            LiteDB.FileMode fileMode = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? LiteDB.FileMode.Exclusive : LiteDB.FileMode.Shared;
+            var db = new LiteDatabase(new ConnectionString() { Filename = this.RandomString(20) + ".db", Upgrade = true, Mode = fileMode });
 
             this.repository = new AddressIndexerOutpointsRepository(db, new ExtendedLoggerFactory(), this.maxItems);
         }

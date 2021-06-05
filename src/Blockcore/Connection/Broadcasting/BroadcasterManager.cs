@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Interfaces;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol.Payloads;
@@ -49,6 +50,7 @@ namespace Blockcore.Connection.Broadcasting
         /// <summary>Adds or updates a transaction from the collection of transactions to broadcast.</summary>
         public void AddOrUpdate(Transaction transaction, TransactionBroadcastState transactionBroadcastState, string errorMessage = null)
         {
+            bool changed = false;
             uint256 trxHash = transaction.GetHash();
             BroadcastTransactionStateChanedEntry broadcastEntry = this.Broadcasts.TryGet(trxHash);
 
@@ -56,11 +58,25 @@ namespace Blockcore.Connection.Broadcasting
             {
                 broadcastEntry = new BroadcastTransactionStateChanedEntry(transaction, transactionBroadcastState, errorMessage);
                 this.Broadcasts.Add(trxHash, broadcastEntry);
-                this.OnTransactionStateChanged(broadcastEntry);
+                changed = true;
             }
-            else if (broadcastEntry.TransactionBroadcastState != transactionBroadcastState)
+            else
             {
-                broadcastEntry.TransactionBroadcastState = transactionBroadcastState;
+                if (broadcastEntry.TransactionBroadcastState != transactionBroadcastState)
+                {
+                    broadcastEntry.TransactionBroadcastState = transactionBroadcastState;
+                    changed = true;
+                }
+
+                if (broadcastEntry.ErrorMessage != errorMessage)
+                {
+                    broadcastEntry.ErrorMessage = errorMessage;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
                 this.OnTransactionStateChanged(broadcastEntry);
             }
         }

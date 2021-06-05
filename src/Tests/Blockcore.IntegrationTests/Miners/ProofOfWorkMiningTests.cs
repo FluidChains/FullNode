@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.IntegrationTests.Common;
 using Blockcore.IntegrationTests.Common.EnvironmentMockUpHelpers;
 using Blockcore.IntegrationTests.Common.Extensions;
@@ -23,6 +25,7 @@ namespace Blockcore.IntegrationTests.Miners
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void MiningAndPropagatingPOW_MineBlockCheckPeerHasNewBlock()
         {
             using (NodeBuilder builder = NodeBuilder.Create(this))

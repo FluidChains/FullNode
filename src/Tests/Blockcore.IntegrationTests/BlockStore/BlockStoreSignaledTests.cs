@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Blockcore.AsyncWork;
 using Blockcore.Connection;
+using Blockcore.Consensus.BlockInfo;
+using Blockcore.Consensus.Chain;
 using Blockcore.Features.BlockStore;
 using Blockcore.IntegrationTests.Common;
 using Blockcore.IntegrationTests.Common.EnvironmentMockUpHelpers;
@@ -205,6 +207,7 @@ namespace Blockcore.IntegrationTests.BlockStore
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void QueueEmpties_WithNoPeersConnected()
         {
             using (NodeBuilder builder = NodeBuilder.Create(this))

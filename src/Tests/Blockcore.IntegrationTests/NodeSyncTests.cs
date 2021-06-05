@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Blockcore.Consensus.BlockInfo;
 using Blockcore.IntegrationTests.Common;
 using Blockcore.IntegrationTests.Common.EnvironmentMockUpHelpers;
 using Blockcore.IntegrationTests.Common.Extensions;
@@ -31,12 +32,13 @@ namespace Blockcore.IntegrationTests
             {
                 this.Name = Guid.NewGuid().ToString();
 
-                Type consensusType = typeof(NBitcoin.Consensus);
+                Type consensusType = typeof(Consensus.Consensus);
                 consensusType.GetProperty("MaxReorgLength").SetValue(this.Consensus, (uint)10);
             }
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void Pow_CanStratisSyncFromCore()
         {
             using (NodeBuilder builder = NodeBuilder.Create(this))
@@ -55,6 +57,7 @@ namespace Blockcore.IntegrationTests
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void Pow_CanStratisSyncFromStratis()
         {
             using (NodeBuilder builder = NodeBuilder.Create(this))
@@ -78,6 +81,7 @@ namespace Blockcore.IntegrationTests
         }
 
         [Fact]
+        [Trait("Unstable", "True")]
         public void Pow_CanCoreSyncFromStratis()
         {
             using (NodeBuilder builder = NodeBuilder.Create(this))

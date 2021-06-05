@@ -7,14 +7,17 @@ using Blockcore.Builder.Feature;
 using Blockcore.Configuration.Logging;
 using Blockcore.Connection;
 using Blockcore.Consensus;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.Checkpoints;
 using Blockcore.Features.BlockStore.AddressIndexing;
 using Blockcore.Features.BlockStore.Pruning;
 using Blockcore.Interfaces;
+using Blockcore.Networks;
 using Blockcore.P2P.Protocol.Payloads;
 using Blockcore.Utilities;
+using Blockcore.Utilities.Store;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NBitcoin;
 
 [assembly: InternalsVisibleTo("Blockcore.Features.BlockStore.Tests")]
 
@@ -196,7 +199,8 @@ namespace Blockcore.Features.BlockStore
                 .FeatureServices(services =>
                     {
                         services.AddSingleton<IBlockStoreQueue, BlockStoreQueue>().AddSingleton<IBlockStore>(provider => provider.GetService<IBlockStoreQueue>());
-                        services.AddSingleton<IBlockRepository, BlockRepository>();
+
+                        fullNodeBuilder.PersistenceProviderManager.RequirePersistence<BlockStoreFeature>(services);
 
                         if (fullNodeBuilder.Network.Consensus.IsProofOfStake)
                             services.AddSingleton<BlockStoreSignaled, ProvenHeadersBlockStoreSignaled>();
@@ -206,8 +210,8 @@ namespace Blockcore.Features.BlockStore
                         services.AddSingleton<StoreSettings>();
                         services.AddSingleton<IBlockStoreQueueFlushCondition, BlockStoreQueueFlushCondition>();
                         services.AddSingleton<IAddressIndexer, AddressIndexer>();
+                        services.AddSingleton<IUtxoIndexer, UtxoIndexer>();
 
-                        services.AddSingleton<IPrunedBlockRepository, PrunedBlockRepository>();
                         services.AddSingleton<IPruneBlockStoreService, PruneBlockStoreService>();
                     });
             });

@@ -1,13 +1,16 @@
 name: Build
 
-on: 
+on:
   push:
     branches:
       - master
+#  repository_dispatch:
+#    types: [build]
+  workflow_dispatch:
 
 jobs:
-  
-  buildTestRelease:
+
+  buildAndUnitTest:
 
     strategy:
       matrix:
@@ -27,7 +30,7 @@ jobs:
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
-    
+
     env:
       PROJECT_NAME: 'Divergenti.Node'
       SOLUTION_PATH: 'src/Blockcore.sln'
@@ -36,10 +39,10 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       name: Checkout
 
-    - name: Setup Node.js (${{ matrix.node_version }})
+    - name: Setup Node.js (12.x)
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node_version }}
@@ -49,32 +52,20 @@ jobs:
         echo VERSION=$(npm run version --silent) >> $GITHUB_ENV
       shell: bash
 
-    - name: Setup .NET Core (${{ matrix.dotnet_version }})
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ matrix.dotnet_version }}
+    - name: Unit Test
+      run: |
+        dotnet nuget locals all --clear
+        dotnet test -v=normal --filter "FullyQualifiedName!~IntegrationTests&Unstable!=True" -c ${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_PATH}}
 
     - name: Restore
       run: dotnet restore ${{env.SOLUTION_PATH}}
 
-    - name: Build
-      run: dotnet build -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m ${{env.SOLUTION_PATH}}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Blockcore-${{env.VERSION}}-${{matrix.os}}-preview
+        path: "${{github.workspace}}/package/"
 
-    - name: Publish
-      run: dotnet publish -c ${{env.BUILD_CONFIGURATION}} -r ${{matrix.runtime}} -v m -o ./bin/publish ${{env.PROJECT_PATH}}
-
-    - name: Package Name
-      run: |
-        echo RELEASE_NAME=${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
-        echo RELEASE_PATH=${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
-      shell: bash
-
-#    - name: Package Name
-#      run: |
-#        echo "::set-env name=RELEASE_NAME::${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
-#        echo "::set-env name=RELEASE_PATH::${{ env.PROJECT_NAME }}-${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
-
-    - name: Package (Linux)
+    - name: Release
       if: matrix.os == 'ubuntu-latest'
       run: |
         echo RELEASE_PATH=./src/${{env.PROJECT_NAME}}/bin/publish/${{env.RELEASE_NAME}} >> $GITHUB_ENV
@@ -96,5 +87,5 @@ jobs:
         draft: true
         prerelease: true
         body: ''
-        name: "Divergenti (Release ${{env.VERSION}})"
-        tag: v${{env.VERSION}}
+        name: "Blockcore ${{env.VERSION}}"
+        tag: ${{env.VERSION}}

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Blockcore.Connection;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.EventBus.CoreEvents;
 using Blockcore.Features.MemoryPool.Interfaces;
 using Blockcore.Interfaces;
+using Blockcore.Networks;
 using Blockcore.P2P.Peer;
 using Blockcore.P2P.Protocol;
 using Blockcore.P2P.Protocol.Behaviors;
@@ -160,6 +162,12 @@ namespace Blockcore.Features.MemoryPool
         {
             try
             {
+                if (this.initialBlockDownloadState.IsInitialBlockDownload())
+                {
+                    this.logger.LogTrace("(-)[IS_IBD]");
+                    return;
+                }
+
                 await this.ProcessMessageAsync(peer, message).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -285,12 +293,6 @@ namespace Blockcore.Features.MemoryPool
                 this.logger.LogTrace("(-)[MAX_INV_SZ]");
                 //Misbehaving(pfrom->GetId(), 20); // TODO: Misbehaving
                 return; //error("message inv size() = %u", vInv.size());
-            }
-
-            if (this.initialBlockDownloadState.IsInitialBlockDownload())
-            {
-                this.logger.LogTrace("(-)[IS_IBD]");
-                return;
             }
 
             //uint32_t nFetchFlags = GetFetchFlags(pfrom, chainActive.Tip(), chainparams.GetConsensus());

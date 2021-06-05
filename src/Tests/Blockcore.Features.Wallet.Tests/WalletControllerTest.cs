@@ -6,6 +6,8 @@ using System.Net;
 using System.Security;
 using Blockcore.Connection;
 using Blockcore.Connection.Broadcasting;
+using Blockcore.Consensus.Chain;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Wallet.Api.Controllers;
 using Blockcore.Features.Wallet.Api.Models;
 using Blockcore.Features.Wallet.Database;
@@ -1029,6 +1031,7 @@ namespace Blockcore.Features.Wallet.Tests
         /// <summary>
         /// Tests that when a transaction has been sent that has multiple inputs to form the transaction these duplicate spending details do not show up multiple times in the history.
         /// </summary>
+
         [Fact]
         public void GetHistoryWithDuplicateSpentTransactionsSelectsDistinctsSpentTransactionsForDuplicates()
         {
@@ -1634,7 +1637,7 @@ namespace Blockcore.Features.Wallet.Tests
             IActionResult result = controller.BuildTransaction(new BuildTransactionRequest
             {
                 AccountName = "Account 0",
-                Recipients = new List<RecipientModel>(),
+                Recipients = new List<RecipientModel>() { new RecipientModel() { Amount = "1.0", DestinationAddress = new Key().PubKey.Hash.GetAddress(this.Network).ToString() } },
                 WalletName = walletName,
                 ChangeAddress = usedReceiveAddress.Address
             });
@@ -1676,7 +1679,7 @@ namespace Blockcore.Features.Wallet.Tests
             IActionResult result = controller.BuildTransaction(new BuildTransactionRequest
             {
                 AccountName = "Account 0",
-                Recipients = new List<RecipientModel>(),
+                Recipients = new List<RecipientModel>() { new RecipientModel() { Amount = "1.0", DestinationAddress = new Key().PubKey.Hash.GetAddress(this.Network).ToString() } },
                 WalletName = walletName,
                 ChangeAddress = addressNotInWallet.Address
             });
@@ -1713,7 +1716,7 @@ namespace Blockcore.Features.Wallet.Tests
             IActionResult result = controller.BuildTransaction(new BuildTransactionRequest
             {
                 AccountName = "Account 0",
-                Recipients = new List<RecipientModel>(),
+                Recipients = new List<RecipientModel>() { new RecipientModel() { Amount = "1.0", DestinationAddress = new Key().PubKey.Hash.GetAddress(this.Network).ToString() } },
                 WalletName = walletName,
                 ChangeAddress = addressNotInWallet.Address
             });

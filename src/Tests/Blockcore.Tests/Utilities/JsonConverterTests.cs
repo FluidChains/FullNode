@@ -1,4 +1,6 @@
 ﻿using System;
+using Blockcore.Consensus.ScriptInfo;
+using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Tests.Common;
 using Blockcore.Utilities.JsonConverters;
 using NBitcoin;
@@ -11,7 +13,6 @@ namespace Blockcore.Tests.Utilities
     public class JsonConverterTests
     {
         [Fact]
-        [Trait("UnitTest", "UnitTest")]
         public void CanSerializeInJson()
         {
             var k = new Key();
