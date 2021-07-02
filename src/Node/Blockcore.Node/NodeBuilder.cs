@@ -44,6 +44,7 @@ namespace Blockcore.Node
                 case "X42":
                 case "BCP":
                 case "CITY":
+                case "DIVER":
                 case "STRAT":
                 case "RUTA":
                 case "EXOS":

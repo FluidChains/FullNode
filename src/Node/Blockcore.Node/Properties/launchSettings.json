@@ -120,6 +120,10 @@
       "commandName": "Project",
       "commandLineArgs": "--chain=EXOS -server -whitelist=192.168.1.180 -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -dbtype=rocksdb -datadir=data"
     },
+    "DIVER (MAIN)": {
+      "commandName": "Project",
+      "commandLineArgs": "--chain=DIVER -server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser"
+    },
     "RUTA (MAIN)": {
       "commandName": "Project",
       "commandLineArgs": "--chain=RUTA -server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser"
