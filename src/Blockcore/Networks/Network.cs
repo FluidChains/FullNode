@@ -28,6 +28,8 @@ namespace Blockcore.Networks
         CONFIRMATION_CODE,
         ASSET_ID,
         MAX_BASE58_TYPES,
+        STEALTH_ADDRESS,
+        COLORED_ADDRESS,
     };
 
     public enum Bech32Type

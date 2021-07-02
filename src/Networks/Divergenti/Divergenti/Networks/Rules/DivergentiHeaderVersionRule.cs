@@ -1,9 +1,11 @@
 ﻿using Blockcore.Consensus;
+using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.Rules;
 using Blockcore.Features.Consensus.Rules.CommonRules;
 using Blockcore.Utilities;
 using Microsoft.Extensions.Logging;
 using NBitcoin;
+
 
 namespace Divergenti.Networks.Rules
 {
@@ -37,7 +39,7 @@ namespace Divergenti.Networks.Rules
 
             if (chainedHeader.Header.Version < 7)
             {
-                Logger.LogTrace("(-)[BAD_VERSION]");
+                this.Logger.LogTrace("(-)[BAD_VERSION]");
 
                 ConsensusErrors.BadVersion.Throw();
             }

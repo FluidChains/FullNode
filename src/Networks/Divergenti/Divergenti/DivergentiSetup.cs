@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Blockcore.Consensus.Checkpoints;
 using Divergenti.Networks;
 using Divergenti.Networks.Setup;
 using NBitcoin;
@@ -124,12 +125,12 @@ namespace Divergenti
 
         public bool IsPoSv3()
         {
-            return Setup.PoSVersion == 3;
+            return this.Setup.PoSVersion == 3;
         }
 
         public bool IsPoSv4()
         {
-            return Setup.PoSVersion == 4;
+            return this.Setup.PoSVersion == 4;
         }
 
 

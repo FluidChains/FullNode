@@ -1,4 +1,6 @@
 ﻿using NBitcoin;
+using Blockcore.Networks;
+
 
 namespace Divergenti.Networks
 {
