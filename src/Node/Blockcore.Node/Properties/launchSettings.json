@@ -110,7 +110,7 @@
     },
     "EXOS (MAIN)": {
       "commandName": "Project",
-      "commandLineArgs": "--chain=EXOS -server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser"
+      "commandLineArgs": "--chain=EXOS -server -rpcallowip=127.0.0.1 -rpcbind=127.0.0.1 -rpcpassword=rpcpassword -rpcuser=rpcuser -dbtype=rocksdb"
     },
     "EXOS (MAIN/LOCAL)": {
       "commandName": "Project",

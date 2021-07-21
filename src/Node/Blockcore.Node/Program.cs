@@ -30,7 +30,7 @@ namespace Blockcore.Node
                 IFullNodeBuilder nodeBuilder = NodeBuilder.Create(chain, nodeSettings);
 
                 IFullNode node = nodeBuilder.Build();
-
+                
                 if (node != null)
                     await node.RunAsync();
             }
