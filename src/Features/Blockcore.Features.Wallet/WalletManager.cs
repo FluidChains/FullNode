@@ -813,7 +813,7 @@ namespace Blockcore.Features.Wallet
             {
                 var trxs = wallet.walletStore.GetAccountHistory(account.Index, account.IsNormalAccount()).ToList();
                 items = trxs.Select(s => new FlatHistorySlim { Transaction = s, Address = s.ScriptPubKey != null ? this.walletIndex[wallet.Name].ScriptToAddressLookup[s.ScriptPubKey] : null })
-                    .Where(t => t.Transaction.CreationTime > date)                    
+                    .Where(t => t.Transaction.CreationTime >= date)                    
                     .ToArray();
             }
 
