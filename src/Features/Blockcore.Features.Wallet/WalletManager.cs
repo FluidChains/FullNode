@@ -764,6 +764,63 @@ namespace Blockcore.Features.Wallet
             return new AccountHistory { Account = account, History = items };
         }
 
+        ///<inheritdoc/>
+        public IEnumerable<HistoryFilter> GetHistoryFilter(string walletName, string address, string accountName = null, DateTimeOffset? creationTime = null)
+        {
+            Guard.NotEmpty(walletName, nameof(walletName));
+
+            Types.Wallet wallet = this.GetWalletByName(walletName);
+
+            var accountsHistory = new List<HistoryFilter>();
+
+
+            lock (this.lockObject)
+            {
+                var accounts = new List<HdAccount>();
+                if (!string.IsNullOrEmpty(accountName))
+                {
+                    HdAccount account = wallet.GetAccount(accountName);
+                    if (account == null)
+                        throw new WalletException($"No account with the name '{accountName}' could be found.");
+
+                    accounts.Add(account);
+                }
+                else
+                {
+                    accounts.AddRange(wallet.GetAccounts());
+                }
+
+                if (!creationTime.HasValue)
+                {
+                    creationTime = this.network.GetGenesis().Header.BlockTime;
+                }
+
+                foreach (HdAccount account in accounts)
+                {
+                    accountsHistory.Add(this.GetHistoryFilter(wallet, address, account, creationTime));
+                }
+
+                return accountsHistory;
+            }
+        }
+
+        public HistoryFilter GetHistoryFilter(Types.Wallet wallet, string address, HdAccount account, DateTimeOffset? date)
+        {
+            Guard.NotNull(account, nameof(account));
+            FlatHistorySlim[] items;
+
+            lock (this.lockObject)
+            {
+                var trxs = wallet.walletStore.GetAccountHistory(account.Index, account.IsNormalAccount()).ToList();
+                items = trxs.Select(s => new FlatHistorySlim { Transaction = s, Address = s.ScriptPubKey != null ? this.walletIndex[wallet.Name].ScriptToAddressLookup[s.ScriptPubKey] : null })
+                    .Where(t => t.Transaction.CreationTime > date)                    
+                    .ToArray();
+            }
+
+            return new HistoryFilter { Account = account, History = items };
+
+        }
+
         /// <inheritdoc />
         public IEnumerable<AccountHistorySlim> GetHistorySlim(string walletName, string accountName = null, int skip = 0, int take = 100)
         {

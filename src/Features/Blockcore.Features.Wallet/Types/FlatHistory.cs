@@ -60,4 +60,11 @@ namespace Blockcore.Features.Wallet.Types
         /// </summary>
         public WalletHistoryData Transaction { get; set; }
     }
+
+    public class HistoryFilter
+    {
+        public HdAccount Account { get; set; }
+
+        public IEnumerable<FlatHistorySlim> History { get; set; }
+    }
 }

@@ -212,6 +212,9 @@ namespace Blockcore.Features.Wallet.Interfaces
         /// <returns>A list of unused addresses. New addresses will be created as necessary.</returns>
         IEnumerable<HdAddress> GetUnusedAddresses(WalletAccountReference accountReference, int count, bool isChange = false, bool alwaysnew = false);
 
+        IEnumerable<HistoryFilter> GetHistoryFilter(string walletName, string address, string accountName = null, DateTimeOffset? date = null);
+
+
         /// <summary>
         /// Gets the history of transactions contained in an account.
         /// If no account name is specified, history will be returned for all accounts in the wallet.
