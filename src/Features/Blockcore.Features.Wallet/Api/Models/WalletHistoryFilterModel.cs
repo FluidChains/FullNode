@@ -53,7 +53,10 @@ namespace Blockcore.Features.Wallet.Api.Models
         /// The Base58 representation of this address.
         /// </summary>
         [JsonProperty(PropertyName = "toAddress", NullValueHandling = NullValueHandling.Ignore)]
-        public string ToAddress { get; set; }
+        public List<string> ToAddress { get; set; }
+
+        [JsonProperty(PropertyName = "fromAddress", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> FromAddress { get; set; }
 
         [JsonProperty(PropertyName = "id")]
         [JsonConverter(typeof(UInt256JsonConverter))]

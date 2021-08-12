@@ -140,7 +140,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                             continue;
                         }
                     }
-
+                    
                     transactionItems.Add(modelItem);
                 }
 
@@ -169,7 +169,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }            
 
             var model = new WalletHistoryFilterModel();
-
+            
             // Get a list of all the transactions found in an account (or in a wallet if no account is specified), with the addresses associated with them.
             IEnumerable<HistoryFilter> historyFilters = walletManager.GetHistoryFilter(request.WalletName, request.Address, request.AccountName, request.FromDate);
 
@@ -182,8 +182,8 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     var modelItem = new TransactionHistoryItemModel
                     {
                         Type = item.Transaction.IsSent ? TransactionItemType.Send : TransactionItemType.Received,
-                        ToAddress = item.Transaction.Address,
                         Amount = item.Transaction.IsSent == false ? item.Transaction.Amount : Money.Zero,
+                        ToAddress = new List<string> { },
                         Id = item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash,
                         Timestamp = item.Transaction.CreationTime,
                         ConfirmedInBlock = item.Transaction.BlockHeight,
@@ -218,7 +218,23 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                             }
 
                             modelItem.Amount = item.Transaction.SentPayments.Where(x => x.PayToSelf == false).Sum(p => p.Amount);
-                        }
+
+                            foreach (var payment in item.Transaction.SentPayments)
+                            {
+                                if (payment.PayToSelf == false)
+                                {
+                                    PaymentHistoryDetailModel paymentDetail = new PaymentHistoryDetailModel()
+                                    {
+                                        Amount = payment.Amount,
+                                        DestinationAddress = payment.DestinationAddress,
+                                        PayToSelf = payment.PayToSelf
+                                    };
+
+                                    modelItem.Payments.Add(paymentDetail);
+
+                                }
+                            }
+                        }     
                     }
                     else // handle receive entries
                     {
