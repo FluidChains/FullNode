@@ -1,6 +1,7 @@
 ﻿using Blockcore.Builder;
 using Blockcore.Configuration;
 using Blockcore.Features.BlockStore;
+using Blockcore.Features.BlockExplorer;
 using Blockcore.Features.ColdStaking;
 using Blockcore.Features.Consensus;
 using Blockcore.Features.Consensus.Interfaces;
@@ -70,7 +71,8 @@ namespace Blockcore.Node
             .UseTransactionNotification()
             .UseNodeHost()
             .AddRPC()
-            .UseDiagnosticFeature();
+            .UseDiagnosticFeature()
+            .UseBlockExplorer();
 
             UseDnsFullNode(nodeBuilder, settings);
 

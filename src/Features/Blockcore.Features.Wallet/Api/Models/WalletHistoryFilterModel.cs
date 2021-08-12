@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Blockcore.Controllers.Models;
 using Blockcore.Utilities.JsonConverters;
 using NBitcoin;
 using Newtonsoft.Json;
@@ -43,6 +44,8 @@ namespace Blockcore.Features.Wallet.Api.Models
         public TransactionHistoryItemModel()
         {
             this.Payments = new List<PaymentHistoryDetailModel>();
+            this.Inputs = new List<string>();
+            this.Outputs = new List<Vout>();
         }
 
         [JsonProperty(PropertyName = "type")]
@@ -52,11 +55,11 @@ namespace Blockcore.Features.Wallet.Api.Models
         /// <summary>
         /// The Base58 representation of this address.
         /// </summary>
-        [JsonProperty(PropertyName = "toAddress", NullValueHandling = NullValueHandling.Ignore)]
-        public List<string> ToAddress { get; set; }
+        [JsonProperty(PropertyName = "inputs", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Inputs { get; set; }
 
-        [JsonProperty(PropertyName = "fromAddress", NullValueHandling = NullValueHandling.Ignore)]
-        public List<string> FromAddress { get; set; }
+        [JsonProperty(PropertyName = "outputs", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Vout> Outputs { get; set; }
 
         [JsonProperty(PropertyName = "id")]
         [JsonConverter(typeof(UInt256JsonConverter))]
@@ -97,6 +100,25 @@ namespace Blockcore.Features.Wallet.Api.Models
         /// The Base58 representation of the destination  address.
         /// </summary>
         [JsonProperty(PropertyName = "destinationAddress")]
+        public string DestinationAddress { get; set; }
+
+        /// <summary>
+        /// The transaction amount.
+        /// </summary>
+        [JsonProperty(PropertyName = "amount")]
+        [JsonConverter(typeof(MoneyJsonConverter))]
+        public Money Amount { get; set; }
+
+        [JsonProperty(PropertyName = "payToSelf")]
+        public bool? PayToSelf { get; set; }
+    }
+
+    public class OutputHistoryDetailModel
+    {
+        /// <summary>
+        /// The Base58 representation of the destination  address.
+        /// </summary>
+        [JsonProperty(PropertyName = "address")]
         public string DestinationAddress { get; set; }
 
         /// <summary>

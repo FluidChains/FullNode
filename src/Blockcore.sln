@@ -148,6 +148,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Networks.SERF", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Divergenti", "Networks\Divergenti\Divergenti\Divergenti.csproj", "{46ECA0B4-1142-47F4-8967-6C51FEC5B8E0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Features.BlockExplorer", "Features\Blockcore.Features.BlockExplorer\Blockcore.Features.BlockExplorer.csproj", "{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -386,6 +388,10 @@ Global
 		{46ECA0B4-1142-47F4-8967-6C51FEC5B8E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46ECA0B4-1142-47F4-8967-6C51FEC5B8E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46ECA0B4-1142-47F4-8967-6C51FEC5B8E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -451,6 +457,7 @@ Global
 		{074057D3-A1BE-409D-B4B4-F01CFA434D58} = {3B56C02B-4468-4268-B797-851562789FCC}
 		{921791B7-DE6B-4E27-BCA1-5C112E3B532C} = {3B56C02B-4468-4268-B797-851562789FCC}
 		{46ECA0B4-1142-47F4-8967-6C51FEC5B8E0} = {3B56C02B-4468-4268-B797-851562789FCC}
+		{7EC7D418-1A9B-4D16-B88A-EC66AC297CC9} = {15D29FFD-6142-4DC5-AFFD-10BA0CA55C45}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C780ABA-5872-4B83-AD3F-A5BD423AD907}

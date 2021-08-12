@@ -183,7 +183,6 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     {
                         Type = item.Transaction.IsSent ? TransactionItemType.Send : TransactionItemType.Received,
                         Amount = item.Transaction.IsSent == false ? item.Transaction.Amount : Money.Zero,
-                        ToAddress = new List<string> { },
                         Id = item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash,
                         Timestamp = item.Transaction.CreationTime,
                         ConfirmedInBlock = item.Transaction.BlockHeight,
