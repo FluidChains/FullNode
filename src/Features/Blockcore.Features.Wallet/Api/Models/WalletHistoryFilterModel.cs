@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Blockcore.Controllers.Models;
+using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Utilities.JsonConverters;
 using NBitcoin;
 using Newtonsoft.Json;
@@ -44,7 +45,7 @@ namespace Blockcore.Features.Wallet.Api.Models
         public TransactionHistoryItemModel()
         {
             this.Payments = new List<PaymentHistoryDetailModel>();
-            this.Inputs = new List<string>();
+            this.Inputs = new List<InputHistoryDetailModel>();
             this.Outputs = new List<Vout>();
         }
 
@@ -56,7 +57,7 @@ namespace Blockcore.Features.Wallet.Api.Models
         /// The Base58 representation of this address.
         /// </summary>
         [JsonProperty(PropertyName = "inputs", NullValueHandling = NullValueHandling.Ignore)]
-        public List<string> Inputs { get; set; }
+        public List<InputHistoryDetailModel> Inputs { get; set; }
 
         [JsonProperty(PropertyName = "outputs", NullValueHandling = NullValueHandling.Ignore)]
         public List<Vout> Outputs { get; set; }
@@ -137,5 +138,33 @@ namespace Blockcore.Features.Wallet.Api.Models
         Received,
         Send,
         Staked
+    }
+
+    public class InputHistoryDetailModel
+    {
+        /// <summary>The scriptsig if this was a coinbase transaction.</summary>
+        [JsonProperty(Order = 0, PropertyName = "coinbase", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Coinbase { get; set; }
+
+        /// <summary>The transaction ID.</summary>
+        [JsonProperty(Order = 1, PropertyName = "txid", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string TxId { get; set; }
+
+        /// <summary>The index of the output.</summary>
+        [JsonProperty(Order = 2, PropertyName = "vout", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public uint? VOut { get; set; }
+
+        /// <summary>The transaction's scriptsig.</summary>
+        [JsonProperty(Order = 3, PropertyName = "scriptSig", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Blockcore.Consensus.ScriptInfo.Script ScriptSig { get; set; }
+
+        /// <summary>The transaction's sequence number. <see cref="https://bitcoin.org/en/developer-guide#locktime-and-sequence-number"/></summary>
+        [JsonProperty(Order = 4, PropertyName = "sequence")]
+        public uint Sequence { get; set; }
+            
+        /// <summary>The transaction's sequence number. <see cref="https://bitcoin.org/en/developer-guide#locktime-and-sequence-number"/></summary>
+        [JsonProperty(Order = 4, PropertyName = "address")]
+        public string Address { get; set; }
+
     }
 }
