@@ -24,6 +24,7 @@ using Blockcore.Features.BlockStore.Repository;
 using Blockcore.Consensus.BlockInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Features.Wallet.Api.Models;
+using Blockcore.Features.MemoryPool.Interfaces;
 
 namespace Blockcore.Features.BlockExplorer.Controllers
 {
@@ -57,6 +58,8 @@ namespace Blockcore.Features.BlockExplorer.Controllers
 
         private readonly IConnectionManager connectionManager;
 
+        private readonly ITxMempool txMempool;
+
         public TransactionStoreController(
             Network network,
             IWalletManager walletManager,
@@ -66,7 +69,8 @@ namespace Blockcore.Features.BlockExplorer.Controllers
             IBroadcasterManager broadcasterManager,
             IBlockRepository blockRepository,
             IConnectionManager connectionManager,
-            IChainState chainState)
+            IChainState chainState,
+            ITxMempool txMempool)
         {
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
             Guard.NotNull(blockStoreCache, nameof(blockStoreCache));
@@ -81,6 +85,7 @@ namespace Blockcore.Features.BlockExplorer.Controllers
             this.chainState = chainState;
             this.blockRepository = blockRepository;
             this.broadcasterManager = broadcasterManager;
+            this.txMempool = txMempool;
         }
 
         /// <summary>
@@ -177,7 +182,7 @@ namespace Blockcore.Features.BlockExplorer.Controllers
 
             try
             {
-                WalletHistoryFilterModel model = HistoryModelBuilder.GetHistoryFilter(this.walletManager, this.blockRepository, this.network, request);
+                WalletHistoryFilterModel model = HistoryModelBuilder.GetHistoryFilter(this.walletManager, this.blockRepository, this.txMempool, this.network, request);
 
                 return this.Json(model);
             }

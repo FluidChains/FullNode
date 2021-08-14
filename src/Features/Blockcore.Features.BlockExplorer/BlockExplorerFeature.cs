@@ -20,6 +20,8 @@ using Blockcore.Features.BlockStore;
 using Blockcore.Signals;
 using Blockcore.Features.BlockExplorer.Controllers;
 using Blockcore.Consensus.Chain;
+using Blockcore.Features.MemoryPool.Interfaces;
+using Blockcore.Features.MemoryPool;
 
 namespace Blockcore.Features.BlockExplorer
 {
@@ -46,6 +48,8 @@ namespace Blockcore.Features.BlockExplorer
       private readonly IBlockStoreQueue blockStoreQueue;
 
       private readonly IConsensusManager consensusManager;
+        
+       private readonly ITxMempool txMempool;
 
       public BlockExplorerFeature(
        ChainIndexer chain,
@@ -57,7 +61,8 @@ namespace Blockcore.Features.BlockExplorer
           IChainState chainState,
           IBlockStoreQueue blockStoreQueue,
           INodeStats nodeStats,
-          IConsensusManager consensusManager)
+          IConsensusManager consensusManager,
+          ITxMempool txMempool)
       {
          this.chain = chain;
          this.blockStoreQueue = blockStoreQueue;
@@ -69,6 +74,7 @@ namespace Blockcore.Features.BlockExplorer
          this.storeSettings = storeSettings;
          this.chainState = chainState;
          this.consensusManager = consensusManager;
+         this.txMempool = txMempool;
 
          //nodeStats.RegisterStats(this.AddInlineStats, StatsType.Inline, 900);
       }
@@ -120,6 +126,7 @@ namespace Blockcore.Features.BlockExplorer
             features
             .AddFeature<BlockExplorerFeature>()
             .DependOn<BlockStoreFeature>()
+            .DependOn<MempoolFeature>()
             .FeatureServices(services =>
             {
                services.AddSingleton<BlockExplorerController>();

@@ -5,6 +5,7 @@ using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Controllers.Models;
 using Blockcore.Features.BlockStore.Repository;
+using Blockcore.Features.MemoryPool.Interfaces;
 using Blockcore.Features.Wallet.Api.Models;
 using Blockcore.Features.Wallet.Database;
 using Blockcore.Features.Wallet.Interfaces;
@@ -19,7 +20,7 @@ namespace Blockcore.Features.BlockExplorer.Controllers
     /// </summary>
     public static class HistoryModelBuilder
     {
-        public static WalletHistoryFilterModel GetHistoryFilter(IWalletManager walletManager, IBlockRepository blockRepository, Network network, WalletHistoryFilterRequest request)
+        public static WalletHistoryFilterModel GetHistoryFilter(IWalletManager walletManager, IBlockRepository blockRepository, ITxMempool txMempool, Network network, WalletHistoryFilterRequest request)
         {
             bool isAddressFilter = request.Address == null ? false : true;
 
@@ -42,7 +43,10 @@ namespace Blockcore.Features.BlockExplorer.Controllers
                     if (isConfirmed)
                     {
                         tx = blockRepository.GetTransactionById(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
-                    } 
+                    }
+                    else {
+                        tx = txMempool.Get(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
+                    }
                     
                     bool isOutputContained = false;
                     bool isInputContained = false;
