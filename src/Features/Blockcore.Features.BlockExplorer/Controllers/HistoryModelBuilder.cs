@@ -33,10 +33,17 @@ namespace Blockcore.Features.BlockExplorer.Controllers
             {
 
                 var transactionItems = new List<TransactionHistoryItemModel>();
-
+                
                 foreach (FlatHistorySlim item in historyFilter.History)
                 {
-                    Transaction tx = blockRepository.GetTransactionById(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
+                    var isConfirmed = item.Transaction.BlockHeight.HasValue;
+
+                    Transaction tx = new Transaction();
+                    if (isConfirmed)
+                    {
+                        tx = blockRepository.GetTransactionById(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
+                    } 
+                    
                     bool isOutputContained = false;
                     bool isInputContained = false;
                     if (isAddressFilter)
