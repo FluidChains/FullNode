@@ -211,6 +211,38 @@ namespace Blockcore.Features.Wallet.Api.Models
         public string SearchQuery { get; set; }
     }
 
+    public class WalletHistoryFilterRequest : RequestModel
+    {
+        public WalletHistoryFilterRequest()
+        {
+            this.AccountName = WalletManager.DefaultAccount;
+        }
+
+        /// <summary>
+        /// The name of the wallet to recover the history for.
+        /// </summary>
+        [Required(ErrorMessage = "The name of the wallet is missing.")]
+        public string WalletName { get; set; }
+
+        /// <summary>
+        /// Optional. The name of the account to recover the history for. If no account name is specified,
+        /// the entire history of the wallet is recovered.
+        /// </summary>
+        public string AccountName { get; set; }
+
+        /// <summary>
+        /// Optional. If set, will filter the transaction history for all transactions made to or from the given address.
+        /// </summary>
+        [IsBitcoinAddress(Required = false)]
+        public string Address { get; set; }
+
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        [FromQuery(Name = "fromDate")]
+        public DateTime FromDate { get; set; }
+    }
+
+
+
     /// <summary>
     /// A class containing the necessary parameters for a wallet balance request.
     /// </summary>

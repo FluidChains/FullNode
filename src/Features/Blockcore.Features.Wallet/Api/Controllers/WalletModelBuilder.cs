@@ -140,7 +140,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                             continue;
                         }
                     }
-
+                    
                     transactionItems.Add(modelItem);
                 }
 
@@ -154,7 +154,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             }
 
             return model;
-        }
+        }       
 
         public static WalletHistoryModel GetHistory(IWalletManager walletManager, Network network, WalletHistoryRequest request)
         {
