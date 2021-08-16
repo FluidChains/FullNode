@@ -169,6 +169,10 @@ namespace Blockcore.Features.BlockExplorer.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the history of a wallet. This method can be filtered by address and/or date.
+        /// </summary>
+        /// <returns><see cref="WalletHistoryFilterRequest"/></returns>
         [Route("history-filter")]
         [HttpGet]
         public IActionResult GetHistoryFilter([FromQuery] WalletHistoryFilterRequest request)
@@ -185,35 +189,6 @@ namespace Blockcore.Features.BlockExplorer.Controllers
                 WalletHistoryFilterModel model = HistoryModelBuilder.GetHistoryFilter(this.walletManager, this.blockRepository, this.txMempool, this.network, request);
 
                 return this.Json(model);
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError("Exception occurred: {0}", e.ToString());
-                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
-            }
-        }
-
-
-        [HttpGet("{wallet}")]
-        [ProducesResponseType(typeof(TransactionVerboseModel), 200)]
-        [ProducesResponseType(typeof(void), 404)]
-        public IActionResult GetHistoryFiler(string id)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return ModelStateErrors.BuildErrorResponse(this.ModelState);
-            }
-
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new ArgumentNullException("id", "id must be specified");
-            }
-
-            try
-            {
-                Transaction trx = this.blockRepository.GetTransactionById(new uint256(id));
-                var model = new TransactionVerboseModel(trx, this.network);
-                return Json(model);
             }
             catch (Exception e)
             {
