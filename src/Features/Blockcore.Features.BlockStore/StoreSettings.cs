@@ -70,7 +70,7 @@ namespace Blockcore.Features.BlockStore
             // For now we reuse the same value as ConsensusSetting, when store moves to core this can be updated.
             this.MaxCacheSize = config.GetOrDefault("maxblkstoremem", 5, this.logger);
 
-            this.TxIndex = config.GetOrDefault<bool>("txindex", false, this.logger);
+            this.TxIndex = config.GetOrDefault<bool>("txindex", true, this.logger);
             this.ReIndex = config.GetOrDefault<bool>("reindex", false, this.logger);
             this.ReIndexChain = config.GetOrDefault<bool>("reindex-chain", false, this.logger);
             this.AddressIndex = config.GetOrDefault<bool>("addressindex", false, this.logger);
