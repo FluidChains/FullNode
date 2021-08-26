@@ -822,7 +822,7 @@ namespace Blockcore.Features.Wallet
         }
 
         /// <inheritdoc />
-        public IEnumerable<AccountHistorySlim> GetHistorySlim(string walletName, string accountName = null, int skip = 0, int take = 100)
+        public IEnumerable<AccountHistorySlim> GetHistorySlim(string walletName, string accountName = null, int skip = 0, int take = 500)
         {
             Guard.NotEmpty(walletName, nameof(walletName));
 
@@ -857,7 +857,7 @@ namespace Blockcore.Features.Wallet
         }
 
         /// <inheritdoc />
-        public AccountHistorySlim GetHistorySlim(Types.Wallet wallet, HdAccount account, int skip = 0, int take = 100)
+        public AccountHistorySlim GetHistorySlim(Types.Wallet wallet, HdAccount account, int skip = 0, int take = 500)
         {
             Guard.NotNull(account, nameof(account));
             FlatHistorySlim[] items;

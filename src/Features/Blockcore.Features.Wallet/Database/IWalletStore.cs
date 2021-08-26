@@ -27,6 +27,6 @@ namespace Blockcore.Features.Wallet.Database
 
         WalletBalanceResult GetBalanceForAccount(int accountIndex, bool excludeColdStake);
 
-        IEnumerable<WalletHistoryData> GetAccountHistory(int accountIndex, bool excludeColdStake, int skip = 0, int take = 100);
+        IEnumerable<WalletHistoryData> GetAccountHistory(int accountIndex, bool excludeColdStake, int skip = 0, int take = 500);
     }
 }

@@ -194,7 +194,7 @@ namespace Blockcore.Features.Wallet.Database
             return count;
         }
 
-        public IEnumerable<WalletHistoryData> GetAccountHistory(int accountIndex, bool excludeColdStake, int skip = 0, int take = 100)
+        public IEnumerable<WalletHistoryData> GetAccountHistory(int accountIndex, bool excludeColdStake, int skip = 0, int take = 500)
         {
             // The result of this method is not guaranteed to be the length
             //  of the 'take' param. In case some of the inputs we have are
