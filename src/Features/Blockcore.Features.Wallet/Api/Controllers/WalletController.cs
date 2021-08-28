@@ -1346,7 +1346,17 @@ namespace Blockcore.Features.Wallet.Api.Controllers
             try
             {
                 var walletReference = new WalletAccountReference(request.WalletName, request.AccountName);
-                HdAddress address = this.walletManager.GetUnusedAddress(walletReference);
+                HdAddress address;
+                if (request.UseAddress)
+                {
+                    Types.Wallet wallet = this.walletManager.GetWallet(request.WalletName);
+
+                    address = wallet.GetAddress(request.AddressToUse);
+                }
+                else {
+                    address = this.walletManager.GetUnusedAddress(walletReference);
+                }
+                
 
                 Money totalAmount = request.TotalAmountToSplit;
                 Money singleUtxoAmount = totalAmount / request.UtxosCount;
@@ -1354,6 +1364,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                 var recipients = new List<Recipient>(request.UtxosCount);
                 for (int i = 0; i < request.UtxosCount; i++)
                     recipients.Add(new Recipient { ScriptPubKey = address.ScriptPubKey, Amount = singleUtxoAmount });
+
 
                 var context = new TransactionBuildContext(this.network)
                 {
@@ -1364,6 +1375,11 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                     Recipients = recipients,
                     Time = (uint)this.dateTimeProvider.GetAdjustedTimeAsUnixTimestamp()
                 };
+
+                if (request.SameChangeAddress)
+                {
+                    context.ChangeAddress = address;
+                }
 
                 Transaction transactionResult = this.walletTransactionHandler.BuildTransaction(context);
 

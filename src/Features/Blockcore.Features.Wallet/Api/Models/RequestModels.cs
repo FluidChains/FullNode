@@ -854,6 +854,14 @@ namespace Blockcore.Features.Wallet.Api.Models
         [Required(ErrorMessage = "A password is required.")]
         public string WalletPassword { get; set; }
 
+        [DefaultValue(false)]
+        public bool UseAddress { get; set; }
+
+        public string AddressToUse { get; set; }
+
+        [DefaultValue(false)]
+        public bool SameChangeAddress { get; set; }
+
         /// <summary>The amount that will be sent.</summary>
         [Required(ErrorMessage = "An amount is required.")]
         [MoneyFormat(ErrorMessage = "The amount is not in the correct format.")]
