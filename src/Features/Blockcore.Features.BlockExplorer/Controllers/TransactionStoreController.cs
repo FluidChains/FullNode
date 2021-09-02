@@ -186,8 +186,8 @@ namespace Blockcore.Features.BlockExplorer.Controllers
 
             try
             {
-                WalletHistoryFilterModel model = HistoryModelBuilder.GetHistoryFilter(this.walletManager, this.blockRepository, this.txMempool, this.network, request);
-
+                WalletHistoryFilterModel model = HistoryModelBuilder.GetHistoryFilter(this.chain, this.walletManager, this.blockRepository, this.txMempool, this.network, request);
+                
                 return this.Json(model);
             }
             catch (Exception e)

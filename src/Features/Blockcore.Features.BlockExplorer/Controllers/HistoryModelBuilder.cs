@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Blockcore.Consensus.Chain;
 using Blockcore.Consensus.ScriptInfo;
 using Blockcore.Consensus.TransactionInfo;
 using Blockcore.Controllers.Models;
@@ -20,7 +21,7 @@ namespace Blockcore.Features.BlockExplorer.Controllers
     /// </summary>
     public static class HistoryModelBuilder
     {
-        public static WalletHistoryFilterModel GetHistoryFilter(IWalletManager walletManager, IBlockRepository blockRepository, ITxMempool txMempool, Network network, WalletHistoryFilterRequest request)
+        public static WalletHistoryFilterModel GetHistoryFilter(ChainIndexer chain, IWalletManager walletManager, IBlockRepository blockRepository, ITxMempool txMempool, Network network, WalletHistoryFilterRequest request)
         {
             bool isAddressFilter = request.Address == null ? false : true;
 
@@ -38,16 +39,23 @@ namespace Blockcore.Features.BlockExplorer.Controllers
                 foreach (FlatHistorySlim item in historyFilter.History)
                 {
                     var isConfirmed = item.Transaction.BlockHeight.HasValue;
-
+                                            
                     Transaction tx = new Transaction();
                     if (isConfirmed)
                     {
-                        tx = blockRepository.GetTransactionById(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
+                        if (chain.Height == walletManager.WalletTipHeight)
+                        {
+                            tx = blockRepository.GetTransactionById(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
+                        }
                     }
                     else {
                         tx = txMempool.Get(new uint256(item.Transaction.IsSent ? item.Transaction.SentTo : item.Transaction.OutPoint.Hash));
                     }
-                    
+
+                    if (tx == null)
+                    {
+                        continue;
+                    }                  
                     bool isOutputContained = false;
                     bool isInputContained = false;
                     if (isAddressFilter)
