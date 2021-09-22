@@ -790,7 +790,7 @@ namespace Blockcore.Features.Wallet
                     accounts.AddRange(wallet.GetAccounts());
                 }
 
-                if (!creationTime.HasValue)
+                if (creationTime == DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc))  
                 {
                     creationTime = this.network.GetGenesis().Header.BlockTime;
                 }

@@ -216,6 +216,8 @@ namespace Blockcore.Features.Wallet.Api.Models
         public WalletHistoryFilterRequest()
         {
             this.AccountName = WalletManager.DefaultAccount;
+            this.FromDate = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+
         }
 
         /// <summary>
