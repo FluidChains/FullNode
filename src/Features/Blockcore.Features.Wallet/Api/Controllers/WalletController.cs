@@ -411,6 +411,30 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
             try
             {
+                WalletHistoryModel model = WalletModelBuilder.GetHistory(this.walletManager, this.network, request);
+
+                return this.Json(model);
+            }
+            catch (Exception e)
+            {
+                this.logger.LogError("Exception occurred: {0}", e.ToString());
+                return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
+            }
+        } 
+
+        [Route("history-slim")]
+        [HttpGet]
+        public IActionResult GetHistory([FromQuery] WalletHistoryRequest request)
+        {
+            Guard.NotNull(request, nameof(request));
+
+            if (!this.ModelState.IsValid)
+            {
+                return ModelStateErrors.BuildErrorResponse(this.ModelState);
+            }
+
+            try
+            {
                 WalletHistoryModel model = WalletModelBuilder.GetHistorySlim(this.walletManager, this.network, request);
 
                 return this.Json(model);
@@ -420,7 +444,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
                 this.logger.LogError("Exception occurred: {0}", e.ToString());
                 return ErrorHelpers.BuildErrorResponse(HttpStatusCode.BadRequest, e.Message, e.ToString());
             }
-        }       
+        }             
 
         /// <summary>
         /// Gets the balance of a wallet in STRAT (or sidechain coin). Both the confirmed and unconfirmed balance are returned.
