@@ -424,7 +424,7 @@ namespace Blockcore.Features.Wallet.Api.Controllers
 
         [Route("history-slim")]
         [HttpGet]
-        public IActionResult GetHistory([FromQuery] WalletHistoryRequest request)
+        public IActionResult GetHistorySlim([FromQuery] WalletHistoryRequest request)
         {
             Guard.NotNull(request, nameof(request));
 
